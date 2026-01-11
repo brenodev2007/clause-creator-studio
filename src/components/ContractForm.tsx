@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContractData } from "@/types/contract";
-import { Plus, X, Upload, FileText } from "lucide-react";
+import { Plus, X, Upload, FileText, Building2, Landmark } from "lucide-react";
 
 interface ContractFormProps {
   data: ContractData;
@@ -20,6 +20,13 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
     onChange({
       ...data,
       client: { ...data.client, [field]: value },
+    });
+  };
+
+  const handleContractorChange = (field: keyof ContractData["contractor"], value: string) => {
+    onChange({
+      ...data,
+      contractor: { ...data.contractor, [field]: value },
     });
   };
 
@@ -107,8 +114,120 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
         </CardContent>
       </Card>
 
-      {/* Client Info */}
+      {/* Contractor Info */}
       <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
+            Dados do Contratado (Sua Empresa)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contractorName">Razão Social</Label>
+              <Input
+                id="contractorName"
+                value={data.contractor.name}
+                onChange={(e) => handleContractorChange("name", e.target.value)}
+                placeholder="Nome da sua empresa"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cnpj">CNPJ</Label>
+              <Input
+                id="cnpj"
+                value={data.contractor.cnpj}
+                onChange={(e) => handleContractorChange("cnpj", e.target.value)}
+                placeholder="00.000.000/0000-00"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contractorEmail">E-mail</Label>
+              <Input
+                id="contractorEmail"
+                type="email"
+                value={data.contractor.email}
+                onChange={(e) => handleContractorChange("email", e.target.value)}
+                placeholder="contato@empresa.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contractorPhone">Telefone</Label>
+              <Input
+                id="contractorPhone"
+                value={data.contractor.phone}
+                onChange={(e) => handleContractorChange("phone", e.target.value)}
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contractorAddress">Endereço Comercial</Label>
+            <Input
+              id="contractorAddress"
+              value={data.contractor.address}
+              onChange={(e) => handleContractorChange("address", e.target.value)}
+              placeholder="Rua, número, bairro, cidade - UF, CEP"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bank Info */}
+      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Landmark className="w-5 h-5 text-primary" />
+            Dados Bancários para Pagamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="bankName">Banco</Label>
+              <Input
+                id="bankName"
+                value={data.contractor.bankName}
+                onChange={(e) => handleContractorChange("bankName", e.target.value)}
+                placeholder="Nome do banco"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankAgency">Agência</Label>
+              <Input
+                id="bankAgency"
+                value={data.contractor.bankAgency}
+                onChange={(e) => handleContractorChange("bankAgency", e.target.value)}
+                placeholder="0000"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankAccount">Conta</Label>
+              <Input
+                id="bankAccount"
+                value={data.contractor.bankAccount}
+                onChange={(e) => handleContractorChange("bankAccount", e.target.value)}
+                placeholder="00000-0"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pixKey">Chave PIX</Label>
+            <Input
+              id="pixKey"
+              value={data.contractor.pixKey}
+              onChange={(e) => handleContractorChange("pixKey", e.target.value)}
+              placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Client Info */}
+      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
@@ -170,7 +289,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </Card>
 
       {/* Contract Details */}
-      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.25s" }}>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold">Detalhes do Contrato</CardTitle>
         </CardHeader>
@@ -239,7 +358,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </Card>
 
       {/* Additional Clauses */}
-      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+      <Card className="shadow-soft border-0 animate-fade-in" style={{ animationDelay: "0.35s" }}>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold">Cláusulas Adicionais</CardTitle>
         </CardHeader>

@@ -60,6 +60,13 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
           {/* Parties */}
           <section>
             <h2 className="text-lg font-bold mb-3 text-primary">DAS PARTES</h2>
+            <p className="text-justify mb-3">
+              <strong>CONTRATADO:</strong> {data.contractor.name || "[Nome da Empresa]"},{" "}
+              inscrito(a) no CNPJ sob o nº {data.contractor.cnpj || "[CNPJ]"},{" "}
+              com sede em {data.contractor.address || "[Endereço Comercial]"},{" "}
+              com e-mail {data.contractor.email || "[E-mail]"} e telefone{" "}
+              {data.contractor.phone || "[Telefone]"}.
+            </p>
             <p className="text-justify">
               <strong>CONTRATANTE:</strong> {data.client.name || "[Nome do Cliente]"},{" "}
               inscrito(a) no CPF/CNPJ sob o nº {data.client.document || "[Documento]"},{" "}
@@ -91,6 +98,21 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
               ({data.price ? extenso(data.price) : "zero reais"}), a ser pago via{" "}
               <strong>{paymentMethodLabels[data.paymentMethod] || "[Forma de pagamento]"}</strong>.
             </p>
+            {(data.contractor.bankName || data.contractor.pixKey) && (
+              <div className="mt-3 p-4 bg-muted rounded-lg">
+                <p className="font-semibold mb-2">Dados para pagamento:</p>
+                {data.contractor.bankName && (
+                  <p>
+                    <strong>Banco:</strong> {data.contractor.bankName}{" "}
+                    | <strong>Agência:</strong> {data.contractor.bankAgency || "-"}{" "}
+                    | <strong>Conta:</strong> {data.contractor.bankAccount || "-"}
+                  </p>
+                )}
+                {data.contractor.pixKey && (
+                  <p><strong>Chave PIX:</strong> {data.contractor.pixKey}</p>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Deadline */}
@@ -148,8 +170,13 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
                 <div className="border-t border-foreground pt-2 mx-8">
                   <p className="font-bold">CONTRATADO</p>
                   <p className="text-sm text-muted-foreground">
-                    [Nome do Contratado]
+                    {data.contractor.name || "[Nome do Contratado]"}
                   </p>
+                  {data.contractor.cnpj && (
+                    <p className="text-xs text-muted-foreground">
+                      CNPJ: {data.contractor.cnpj}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
