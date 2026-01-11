@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContractData } from "@/types/contract";
-import { Plus, X, Upload, User, Building2, Landmark, FileEdit, ListPlus, ImagePlus } from "lucide-react";
+import { Plus, X, Upload, User, Building2, Landmark, FileEdit, ListPlus, ImagePlus, Pencil, Check, GripVertical } from "lucide-react";
 
 interface ContractFormProps {
   data: ContractData;
@@ -15,6 +15,8 @@ interface ContractFormProps {
 
 const ContractForm = ({ data, onChange }: ContractFormProps) => {
   const [newClause, setNewClause] = useState("");
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
 
   const handleClientChange = (field: keyof ContractData["client"], value: string) => {
     onChange({
@@ -49,6 +51,29 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       ...data,
       additionalClauses: data.additionalClauses.filter((_, i) => i !== index),
     });
+  };
+
+  const startEditClause = (index: number) => {
+    setEditingIndex(index);
+    setEditingText(data.additionalClauses[index]);
+  };
+
+  const saveEditClause = () => {
+    if (editingIndex !== null && editingText.trim()) {
+      const updatedClauses = [...data.additionalClauses];
+      updatedClauses[editingIndex] = editingText.trim();
+      onChange({
+        ...data,
+        additionalClauses: updatedClauses,
+      });
+      setEditingIndex(null);
+      setEditingText("");
+    }
+  };
+
+  const cancelEditClause = () => {
+    setEditingIndex(null);
+    setEditingText("");
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -398,58 +423,154 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       {/* Additional Clauses */}
       <Card className="shadow-soft border-0 bg-card rounded-2xl overflow-hidden animate-fade-in" style={{ animationDelay: "0.25s" }}>
         <CardHeader className="pb-2 pt-6 px-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="text-xl font-display font-semibold flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-destructive/10">
-                <ListPlus className="w-5 h-5 text-destructive" />
+              <div className="p-2 rounded-xl bg-accent/10">
+                <ListPlus className="w-5 h-5 text-accent" />
               </div>
-              Cláusulas Adicionais
+              Cláusulas do Contrato
             </CardTitle>
             {data.additionalClauses.length > 0 && (
-              <span className="text-xs font-medium text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
-                {data.additionalClauses.length} cláusula{data.additionalClauses.length !== 1 ? 's' : ''}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-accent bg-accent/10 px-3 py-1.5 rounded-full">
+                  {data.additionalClauses.length} cláusula{data.additionalClauses.length !== 1 ? 's' : ''}
+                </span>
+              </div>
             )}
           </div>
         </CardHeader>
-        <CardContent className="p-6 pt-4 space-y-4">
-          <div className="flex gap-3">
-            <Textarea
-              value={newClause}
-              onChange={(e) => setNewClause(e.target.value)}
-              placeholder="Digite uma cláusula adicional para incluir no contrato..."
-              rows={3}
-              className="flex-1 rounded-xl border-border/60 focus:border-primary resize-none"
-            />
-            <Button 
-              onClick={addClause} 
-              size="icon" 
-              className="h-auto aspect-square btn-premium rounded-xl shadow-glow"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
+        <CardContent className="p-6 pt-4 space-y-5">
+          {/* Add new clause */}
+          <div className="p-4 bg-gradient-to-br from-accent/5 to-primary/5 rounded-xl border border-accent/20">
+            <Label className="text-sm font-medium text-foreground mb-3 block">Adicionar nova cláusula</Label>
+            <div className="flex gap-3">
+              <Textarea
+                value={newClause}
+                onChange={(e) => setNewClause(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.ctrlKey) {
+                    addClause();
+                  }
+                }}
+                placeholder="Digite o texto da cláusula aqui... (Ctrl+Enter para adicionar)"
+                rows={3}
+                className="flex-1 rounded-xl border-border/60 focus:border-accent bg-background resize-none"
+              />
+              <Button 
+                onClick={addClause}
+                disabled={!newClause.trim()}
+                className="h-auto px-5 bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center gap-1"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Adicionar</span>
+              </Button>
+            </div>
           </div>
+
+          {/* Clauses list */}
           {data.additionalClauses.length > 0 && (
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Clique no ícone de lápis para editar</span>
+              </div>
               {data.additionalClauses.map((clause, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-3 p-4 bg-secondary/50 rounded-xl animate-scale-in group hover:bg-secondary transition-colors"
+                  className={`rounded-xl border transition-all duration-300 ${
+                    editingIndex === index 
+                      ? 'border-primary bg-primary/5 shadow-glow' 
+                      : 'border-border/50 bg-secondary/30 hover:bg-secondary/60 hover:border-border'
+                  }`}
                 >
-                  <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                    {index + 1}
-                  </span>
-                  <span className="flex-1 text-sm leading-relaxed pt-1">{clause}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeClause(index)}
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  {editingIndex === index ? (
+                    /* Editing mode */
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editando cláusula {index + 1}
+                      </div>
+                      <Textarea
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && e.ctrlKey) {
+                            saveEditClause();
+                          }
+                          if (e.key === 'Escape') {
+                            cancelEditClause();
+                          }
+                        }}
+                        rows={4}
+                        className="rounded-xl border-primary/30 focus:border-primary bg-background resize-none"
+                        autoFocus
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          Ctrl+Enter para salvar • Esc para cancelar
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={cancelEditClause}
+                            className="rounded-lg h-9 px-4"
+                          >
+                            <X className="w-4 h-4 mr-1.5" />
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={saveEditClause}
+                            disabled={!editingText.trim()}
+                            className="rounded-lg h-9 px-4 bg-primary hover:bg-primary/90"
+                          >
+                            <Check className="w-4 h-4 mr-1.5" />
+                            Salvar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* View mode */
+                    <div className="flex items-start gap-3 p-4 group">
+                      <div className="flex items-center gap-2">
+                        <GripVertical className="w-4 h-4 text-muted-foreground/40 cursor-grab" />
+                        <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-sm font-bold text-accent">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <p className="flex-1 text-sm leading-relaxed pt-1 text-foreground/90">{clause}</p>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startEditClause(index)}
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeClause(index)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {data.additionalClauses.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <ListPlus className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Nenhuma cláusula adicionada ainda</p>
+              <p className="text-xs mt-1">Selecione um modelo ou adicione cláusulas personalizadas acima</p>
             </div>
           )}
         </CardContent>
