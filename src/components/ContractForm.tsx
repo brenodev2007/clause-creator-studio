@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContractData } from "@/types/contract";
 import { Plus, X, Upload, User, Building2, Landmark, FileEdit, ListPlus, ImagePlus, Pencil, Check, GripVertical } from "lucide-react";
+import { maskCNPJ, maskCPFOrCNPJ, maskPhone, maskBankAgency, maskBankAccount } from "@/hooks/use-input-masks";
 
 interface ContractFormProps {
   data: ContractData;
@@ -175,8 +176,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="cnpj"
                 value={data.contractor.cnpj}
-                onChange={(e) => handleContractorChange("cnpj", e.target.value)}
+                onChange={(e) => handleContractorChange("cnpj", maskCNPJ(e.target.value))}
                 placeholder="00.000.000/0000-00"
+                maxLength={18}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
@@ -198,8 +200,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="contractorPhone"
                 value={data.contractor.phone}
-                onChange={(e) => handleContractorChange("phone", e.target.value)}
+                onChange={(e) => handleContractorChange("phone", maskPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
+                maxLength={15}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
@@ -244,8 +247,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="bankAgency"
                 value={data.contractor.bankAgency}
-                onChange={(e) => handleContractorChange("bankAgency", e.target.value)}
-                placeholder="0000"
+                onChange={(e) => handleContractorChange("bankAgency", maskBankAgency(e.target.value))}
+                placeholder="0000-0"
+                maxLength={6}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
@@ -254,8 +258,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="bankAccount"
                 value={data.contractor.bankAccount}
-                onChange={(e) => handleContractorChange("bankAccount", e.target.value)}
+                onChange={(e) => handleContractorChange("bankAccount", maskBankAccount(e.target.value))}
                 placeholder="00000-0"
+                maxLength={14}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
@@ -300,8 +305,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="document"
                 value={data.client.document}
-                onChange={(e) => handleClientChange("document", e.target.value)}
+                onChange={(e) => handleClientChange("document", maskCPFOrCNPJ(e.target.value))}
                 placeholder="000.000.000-00"
+                maxLength={18}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
@@ -323,8 +329,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               <Input
                 id="phone"
                 value={data.client.phone}
-                onChange={(e) => handleClientChange("phone", e.target.value)}
+                onChange={(e) => handleClientChange("phone", maskPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
+                maxLength={15}
                 className="rounded-xl h-11 border-border/60 focus:border-primary"
               />
             </div>
