@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
+import TemplateSelector from "@/components/TemplateSelector";
 import { ContractData } from "@/types/contract";
+import { ContractTemplate } from "@/data/contractTemplates";
 import { Download, FileText, Edit, Eye } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -39,9 +41,23 @@ const initialData: ContractData = {
 
 const Index = () => {
   const [contractData, setContractData] = useState<ContractData>(initialData);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("edit");
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const handleSelectTemplate = (template: ContractTemplate) => {
+    setSelectedTemplateId(template.id);
+    setContractData((prev) => ({
+      ...prev,
+      serviceDescription: template.defaultServiceDescription,
+      additionalClauses: [...template.clauses],
+    }));
+    toast({
+      title: `Modelo "${template.name}" aplicado!`,
+      description: `${template.clauses.length} cláusulas foram adicionadas automaticamente.`,
+    });
+  };
 
   const generatePDF = async () => {
     setActiveTab("preview");
@@ -138,7 +154,11 @@ const Index = () => {
             </Button>
           </div>
 
-          <TabsContent value="edit" className="animate-fade-in">
+          <TabsContent value="edit" className="animate-fade-in space-y-6">
+            <TemplateSelector 
+              onSelectTemplate={handleSelectTemplate} 
+              selectedTemplateId={selectedTemplateId} 
+            />
             <ContractForm data={contractData} onChange={setContractData} />
           </TabsContent>
 
