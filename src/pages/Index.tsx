@@ -154,7 +154,7 @@ const Index = () => {
       <main className="max-w-5xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Controls */}
-          <div className="flex items-center gap-1 p-1 bg-secondary rounded-lg w-fit mb-8">
+          <TabsList className="flex items-center gap-1 p-1 bg-secondary rounded-lg w-fit mb-8 h-auto">
             <TabsTrigger 
               value="edit" 
               className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-minimal transition-all"
@@ -169,7 +169,7 @@ const Index = () => {
               <Eye className="w-4 h-4" />
               Visualizar
             </TabsTrigger>
-          </div>
+          </TabsList>
 
           {/* Tab Content */}
           <TabsContent value="edit" className="animate-in space-y-6 mt-0">
