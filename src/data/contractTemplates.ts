@@ -4,7 +4,6 @@ export interface ContractTemplate {
   id: string;
   name: string;
   description: string;
-  icon: string;
   defaultServiceDescription: string;
   clauses: string[];
 }
@@ -13,8 +12,7 @@ export const contractTemplates: ContractTemplate[] = [
   {
     id: "freelancer",
     name: "Freelancer",
-    description: "Contrato para trabalhos freelance e projetos pontuais",
-    icon: "💻",
+    description: "Trabalhos freelance e projetos pontuais",
     defaultServiceDescription: "Prestação de serviços de desenvolvimento/design conforme escopo definido entre as partes.",
     clauses: [
       "O CONTRATADO realizará o trabalho de forma autônoma, sem vínculo empregatício com o CONTRATANTE, podendo definir seus próprios horários e métodos de trabalho.",
@@ -28,8 +26,7 @@ export const contractTemplates: ContractTemplate[] = [
   {
     id: "consultoria",
     name: "Consultoria",
-    description: "Contrato para serviços de consultoria especializada",
-    icon: "📊",
+    description: "Serviços de consultoria especializada",
     defaultServiceDescription: "Prestação de serviços de consultoria especializada, incluindo análise, diagnóstico e recomendações estratégicas.",
     clauses: [
       "A consultoria será prestada de forma independente, cabendo ao CONTRATADO a liberdade técnica para conduzir os trabalhos segundo as melhores práticas do mercado.",
@@ -44,8 +41,7 @@ export const contractTemplates: ContractTemplate[] = [
   {
     id: "prestacao-servicos",
     name: "Prestação de Serviços",
-    description: "Contrato geral para prestação de serviços diversos",
-    icon: "📋",
+    description: "Contrato geral para serviços diversos",
     defaultServiceDescription: "Prestação de serviços especializados conforme especificações acordadas entre as partes.",
     clauses: [
       "O CONTRATADO prestará os serviços descritos neste contrato com zelo, diligência e em conformidade com as normas técnicas aplicáveis.",
@@ -60,8 +56,7 @@ export const contractTemplates: ContractTemplate[] = [
   {
     id: "desenvolvimento-software",
     name: "Desenvolvimento de Software",
-    description: "Contrato específico para desenvolvimento de sistemas e aplicativos",
-    icon: "🖥️",
+    description: "Desenvolvimento de sistemas e aplicativos",
     defaultServiceDescription: "Desenvolvimento de software/sistema/aplicativo conforme especificações técnicas definidas no escopo do projeto.",
     clauses: [
       "O CONTRATADO desenvolverá o software conforme especificações técnicas acordadas, seguindo as melhores práticas de desenvolvimento e padrões de qualidade.",
@@ -77,8 +72,7 @@ export const contractTemplates: ContractTemplate[] = [
   {
     id: "marketing-digital",
     name: "Marketing Digital",
-    description: "Contrato para serviços de marketing e gestão de redes sociais",
-    icon: "📱",
+    description: "Marketing e gestão de redes sociais",
     defaultServiceDescription: "Prestação de serviços de marketing digital, incluindo gestão de redes sociais, criação de conteúdo e estratégias de divulgação.",
     clauses: [
       "O CONTRATADO será responsável pela criação, planejamento e publicação de conteúdo nas plataformas digitais acordadas, seguindo a identidade visual e tom de voz do CONTRATANTE.",
