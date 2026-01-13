@@ -175,6 +175,17 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
             </p>
             <div className="grid grid-cols-2 gap-12">
               <div className="text-center">
+                {data.clientSignature ? (
+                  <div className="mb-2">
+                    <img 
+                      src={data.clientSignature} 
+                      alt="Assinatura do Contratante" 
+                      className="h-16 object-contain mx-auto"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-16 mb-2" />
+                )}
                 <div className="border-t border-foreground pt-3 mx-4">
                   <p className="font-bold">CONTRATANTE</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -183,6 +194,17 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
                 </div>
               </div>
               <div className="text-center">
+                {data.contractorSignature ? (
+                  <div className="mb-2">
+                    <img 
+                      src={data.contractorSignature} 
+                      alt="Assinatura do Contratado" 
+                      className="h-16 object-contain mx-auto"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-16 mb-2" />
+                )}
                 <div className="border-t border-foreground pt-3 mx-4">
                   <p className="font-bold">CONTRATADO</p>
                   <p className="text-xs text-muted-foreground mt-1">

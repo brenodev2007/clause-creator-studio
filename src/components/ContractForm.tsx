@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ContractData } from "@/types/contract";
 import { Plus, X, Upload, Pencil, Check } from "lucide-react";
 import { maskCNPJ, maskCPFOrCNPJ, maskPhone, maskBankAgency, maskBankAccount } from "@/hooks/use-input-masks";
+import SignaturePad from "@/components/SignaturePad";
 
 interface ContractFormProps {
   data: ContractData;
@@ -509,6 +510,23 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             <p className="text-xs mt-1">Selecione um modelo ou adicione manualmente</p>
           </div>
         )}
+      </section>
+
+      {/* Signatures */}
+      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+        <SectionTitle>Assinaturas Digitais</SectionTitle>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SignaturePad
+            label="Assinatura do Contratante"
+            value={data.clientSignature}
+            onChange={(signature) => onChange({ ...data, clientSignature: signature })}
+          />
+          <SignaturePad
+            label="Assinatura do Contratado"
+            value={data.contractorSignature}
+            onChange={(signature) => onChange({ ...data, contractorSignature: signature })}
+          />
+        </div>
       </section>
     </div>
   );

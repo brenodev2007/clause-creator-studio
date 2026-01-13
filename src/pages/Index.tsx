@@ -37,6 +37,8 @@ const initialData: ContractData = {
   serviceDescription: "",
   additionalClauses: [],
   logo: null,
+  clientSignature: null,
+  contractorSignature: null,
 };
 
 const Index = () => {

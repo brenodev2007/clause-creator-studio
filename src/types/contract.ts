@@ -30,4 +30,6 @@ export interface ContractData {
   serviceDescription: string;
   additionalClauses: string[];
   logo: string | null;
+  clientSignature: string | null;
+  contractorSignature: string | null;
 }
