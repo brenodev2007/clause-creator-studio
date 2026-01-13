@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
+import ContractHistory from "@/components/ContractHistory";
 import TemplateSelector from "@/components/TemplateSelector";
 import { ContractData } from "@/types/contract";
 import { ContractTemplate } from "@/data/contractTemplates";
-import { Download, FileText, Pencil, Eye } from "lucide-react";
+import { useContractHistory, SavedContract } from "@/hooks/use-contract-history";
+import { Download, FileText, Pencil, Eye, Save } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "@/hooks/use-toast";
@@ -47,6 +49,39 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("edit");
   const previewRef = useRef<HTMLDivElement>(null);
+  const { savedContracts, saveContract, deleteContract, clearHistory } = useContractHistory();
+
+  const handleSaveContract = () => {
+    const saved = saveContract(contractData);
+    toast({
+      title: "Contrato salvo",
+      description: `"${saved.name}" foi adicionado ao histórico.`,
+    });
+  };
+
+  const handleLoadContract = (contract: SavedContract) => {
+    setContractData(contract.data);
+    toast({
+      title: "Contrato carregado",
+      description: `"${contract.name}" foi restaurado.`,
+    });
+  };
+
+  const handleDeleteContract = (id: string) => {
+    deleteContract(id);
+    toast({
+      title: "Contrato removido",
+      description: "O contrato foi excluído do histórico.",
+    });
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    toast({
+      title: "Histórico limpo",
+      description: "Todos os contratos foram removidos.",
+    });
+  };
 
   const handleSelectTemplate = (template: ContractTemplate) => {
     setSelectedTemplateId(template.id);
@@ -127,14 +162,24 @@ const Index = () => {
               </div>
               <span className="font-semibold text-lg tracking-tight">Contratos</span>
             </div>
-            <Button
-              onClick={generatePDF}
-              disabled={isGenerating}
-              className="btn-primary h-9 px-4 rounded-md"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              {isGenerating ? "Gerando..." : "Exportar PDF"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleSaveContract}
+                variant="outline"
+                className="h-9 px-4 rounded-md"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Salvar
+              </Button>
+              <Button
+                onClick={generatePDF}
+                disabled={isGenerating}
+                className="btn-primary h-9 px-4 rounded-md"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isGenerating ? "Gerando..." : "Exportar PDF"}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -175,6 +220,12 @@ const Index = () => {
 
           {/* Tab Content */}
           <TabsContent value="edit" className="animate-in space-y-6 mt-0">
+            <ContractHistory
+              contracts={savedContracts}
+              onLoad={handleLoadContract}
+              onDelete={handleDeleteContract}
+              onClearAll={handleClearHistory}
+            />
             <TemplateSelector 
               onSelectTemplate={handleSelectTemplate} 
               selectedTemplateId={selectedTemplateId} 
