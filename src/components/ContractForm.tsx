@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ContractData } from "@/types/contract";
-import { Plus, X, Upload, Pencil, Check } from "lucide-react";
-import { maskCNPJ, maskCPFOrCNPJ, maskPhone, maskBankAgency, maskBankAccount } from "@/hooks/use-input-masks";
+import { Plus, X, Upload, Pencil, Check, AlertCircle, CheckCircle2 } from "lucide-react";
+import { maskCNPJ, maskCPFOrCNPJ, maskPhone, maskBankAgency, maskBankAccount, validateCNPJ, validateCPFOrCNPJ } from "@/hooks/use-input-masks";
 import SignaturePad from "@/components/SignaturePad";
 
 interface ContractFormProps {
@@ -18,6 +18,21 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
   const [newClause, setNewClause] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
+
+  // Validações de documentos
+  const clientDocumentValidation = useMemo(() => {
+    if (!data.client.document || data.client.document.replace(/\D/g, "").length === 0) {
+      return { valid: true, type: 'empty' as const };
+    }
+    return validateCPFOrCNPJ(data.client.document);
+  }, [data.client.document]);
+
+  const contractorCnpjValidation = useMemo(() => {
+    const cleaned = data.contractor.cnpj.replace(/\D/g, "");
+    if (cleaned.length === 0) return { valid: true, complete: false };
+    if (cleaned.length < 14) return { valid: true, complete: false };
+    return { valid: validateCNPJ(data.contractor.cnpj), complete: true };
+  }, [data.contractor.cnpj]);
 
   const handleClientChange = (field: keyof ContractData["client"], value: string) => {
     onChange({
@@ -156,14 +171,26 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cnpj" className="text-sm">CNPJ</Label>
+            <Label htmlFor="cnpj" className="text-sm flex items-center gap-2">
+              CNPJ
+              {contractorCnpjValidation.complete && (
+                contractorCnpjValidation.valid ? (
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                ) : (
+                  <span className="flex items-center gap-1 text-destructive text-xs font-normal">
+                    <AlertCircle className="w-3 h-3" />
+                    CNPJ inválido
+                  </span>
+                )
+              )}
+            </Label>
             <Input
               id="cnpj"
               value={data.contractor.cnpj}
               onChange={(e) => handleContractorChange("cnpj", maskCNPJ(e.target.value))}
               placeholder="00.000.000/0000-00"
               maxLength={18}
-              className="h-10"
+              className={`h-10 ${contractorCnpjValidation.complete && !contractorCnpjValidation.valid ? 'border-destructive focus-visible:ring-destructive' : ''}`}
             />
           </div>
           <div className="space-y-2">
@@ -265,14 +292,29 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="document" className="text-sm">CPF / CNPJ</Label>
+            <Label htmlFor="document" className="text-sm flex items-center gap-2">
+              CPF / CNPJ
+              {clientDocumentValidation.type !== 'incomplete' && clientDocumentValidation.type !== 'empty' && (
+                clientDocumentValidation.valid ? (
+                  <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
+                    <CheckCircle2 className="w-3 h-3" />
+                    {clientDocumentValidation.type === 'cpf' ? 'CPF válido' : 'CNPJ válido'}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-destructive text-xs font-normal">
+                    <AlertCircle className="w-3 h-3" />
+                    {clientDocumentValidation.type === 'cpf' ? 'CPF inválido' : 'CNPJ inválido'}
+                  </span>
+                )
+              )}
+            </Label>
             <Input
               id="document"
               value={data.client.document}
               onChange={(e) => handleClientChange("document", maskCPFOrCNPJ(e.target.value))}
               placeholder="000.000.000-00"
               maxLength={18}
-              className="h-10"
+              className={`h-10 ${clientDocumentValidation.type !== 'incomplete' && clientDocumentValidation.type !== 'empty' && !clientDocumentValidation.valid ? 'border-destructive focus-visible:ring-destructive' : ''}`}
             />
           </div>
           <div className="space-y-2">
