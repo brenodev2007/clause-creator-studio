@@ -5,6 +5,7 @@ import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
 import ContractHistory from "@/components/ContractHistory";
 import TemplateSelector from "@/components/TemplateSelector";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ContractData } from "@/types/contract";
 import { ContractTemplate } from "@/data/contractTemplates";
 import { useContractHistory, SavedContract } from "@/hooks/use-contract-history";
@@ -163,6 +164,7 @@ const Index = () => {
               <span className="font-semibold text-lg tracking-tight">Contratos</span>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 onClick={handleSaveContract}
                 variant="outline"
