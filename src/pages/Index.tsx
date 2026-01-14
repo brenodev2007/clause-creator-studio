@@ -85,6 +85,20 @@ const Index = () => {
   };
 
   const handleSelectTemplate = (template: ContractTemplate) => {
+    if (selectedTemplateId === template.id) {
+      setSelectedTemplateId(undefined);
+      setContractData((prev) => ({
+        ...prev,
+        serviceDescription: "",
+        additionalClauses: [],
+      }));
+      toast({
+        title: "Modelo removido",
+        description: "As cláusulas automáticas foram removidas.",
+      });
+      return;
+    }
+
     setSelectedTemplateId(template.id);
     setContractData((prev) => ({
       ...prev,
