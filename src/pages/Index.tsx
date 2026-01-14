@@ -172,10 +172,7 @@ const Index = () => {
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
-                <FileText className="w-4 h-4 text-background" />
-              </div>
-              <span className="font-semibold text-lg tracking-tight">Contratos</span>
+              <img src="/logo.png" alt="Logo" className="h-20 md:h-20 w-auto object-contain" />
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
@@ -262,10 +259,7 @@ const Index = () => {
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-background" />
-                </div>
-                <span className="font-semibold text-lg tracking-tight">Contratos</span>
+                <img src="/logo.png" alt="Logo" className="h-14 md:h-16 w-auto object-contain" />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Crie contratos profissionais de forma rápida e simples. 
