@@ -242,11 +242,72 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 mt-16">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Contratos</span>
-            <span>© {new Date().getFullYear()}</span>
+      <footer className="border-t border-border bg-secondary/30 mt-16">
+        <div className="max-w-5xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-background" />
+                </div>
+                <span className="font-semibold text-lg tracking-tight">Contratos</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Crie contratos profissionais de forma rápida e simples. 
+                Personalize, assine e exporte em PDF.
+              </p>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-foreground">Recursos</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Modelos pré-configurados
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Validação de CPF/CNPJ
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Assinatura digital
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Exportação em PDF
+                </li>
+              </ul>
+            </div>
+
+            {/* Info */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-foreground">Informações</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Dados salvos localmente
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Histórico de contratos
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                  Tema claro e escuro
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom */}
+          <div className="mt-10 pt-6 border-t border-border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+              <span>© {new Date().getFullYear()} Contratos. Todos os direitos reservados.</span>
+              <span className="text-xs">Feito com dedicação para simplificar sua rotina.</span>
+            </div>
           </div>
         </div>
       </footer>
