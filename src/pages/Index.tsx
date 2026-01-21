@@ -5,11 +5,14 @@ import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
 import ContractHistory from "@/components/ContractHistory";
 import TemplateSelector from "@/components/TemplateSelector";
+import TokenDisplay from "@/components/TokenDisplay";
+import PricingModal from "@/components/PricingModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ContractData } from "@/types/contract";
 import { ContractTemplate } from "@/data/contractTemplates";
 import { useContractHistory, SavedContract } from "@/hooks/use-contract-history";
-import { Download, FileText, Pencil, Eye, Save } from "lucide-react";
+import { useTokens } from "@/hooks/use-tokens";
+import { Download, Pencil, Eye, Save } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "@/hooks/use-toast";
@@ -51,20 +54,33 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("edit");
   const previewRef = useRef<HTMLDivElement>(null);
   const { savedContracts, saveContract, deleteContract, clearHistory } = useContractHistory();
+  const { 
+    tokens, 
+    showPricingModal, 
+    pendingAction,
+    consumeTokens, 
+    addTokens, 
+    closePricingModal,
+    setShowPricingModal 
+  } = useTokens();
 
   const handleSaveContract = () => {
+    if (!consumeTokens("save-contract")) return;
+    
     const saved = saveContract(contractData);
     toast({
       title: "Contrato salvo",
-      description: `"${saved.name}" foi adicionado ao histórico.`,
+      description: `"${saved.name}" foi adicionado ao histórico. (-1 token)`,
     });
   };
 
   const handleLoadContract = (contract: SavedContract) => {
+    if (!consumeTokens("load-contract")) return;
+    
     setContractData(contract.data);
     toast({
       title: "Contrato carregado",
-      description: `"${contract.name}" foi restaurado.`,
+      description: `"${contract.name}" foi restaurado. (-1 token)`,
     });
   };
 
@@ -99,6 +115,8 @@ const Index = () => {
       return;
     }
 
+    if (!consumeTokens("apply-template")) return;
+
     setSelectedTemplateId(template.id);
     setContractData((prev) => ({
       ...prev,
@@ -107,11 +125,21 @@ const Index = () => {
     }));
     toast({
       title: "Modelo aplicado",
-      description: `${template.clauses.length} cláusulas adicionadas.`,
+      description: `${template.clauses.length} cláusulas adicionadas. (-1 token)`,
+    });
+  };
+
+  const handleBuyTokens = (amount: number) => {
+    addTokens(amount);
+    toast({
+      title: "Tokens adicionados!",
+      description: `+${amount} tokens foram adicionados à sua conta.`,
     });
   };
 
   const generatePDF = async () => {
+    if (!consumeTokens("export-pdf")) return;
+    
     setActiveTab("preview");
     
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -151,7 +179,7 @@ const Index = () => {
       
       toast({
         title: "PDF gerado",
-        description: `Arquivo ${fileName} baixado.`,
+        description: `Arquivo ${fileName} baixado. (-3 tokens)`,
       });
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
@@ -167,6 +195,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PricingModal
+        open={showPricingModal}
+        onClose={closePricingModal}
+        onSelectPlan={handleBuyTokens}
+        pendingAction={pendingAction}
+        currentTokens={tokens}
+      />
       {/* Header */}
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4">
@@ -175,6 +210,10 @@ const Index = () => {
               <img src="/logo.png" alt="Logo" className="h-20 md:h-20 w-auto object-contain" />
             </div>
             <div className="flex items-center gap-2">
+              <TokenDisplay 
+                tokens={tokens} 
+                onBuyTokens={() => setShowPricingModal(true)} 
+              />
               <ThemeToggle />
               <Button
                 onClick={handleSaveContract}
