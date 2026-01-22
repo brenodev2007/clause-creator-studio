@@ -6,51 +6,89 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Check, Coins, Sparkles, Zap, Crown } from "lucide-react";
-import { TokenAction } from "@/hooks/use-tokens";
+import { Check, Sparkles, Zap, Crown, Infinity } from "lucide-react";
+import { TokenAction, PlanType, PLAN_LIMITS } from "@/hooks/use-tokens";
 
 interface PricingPlan {
-  id: string;
+  id: PlanType;
   name: string;
-  tokens: number;
+  dailyTokens: number | string;
   price: number;
+  priceLabel: string;
   icon: React.ReactNode;
   popular?: boolean;
   features: string[];
+  gradient: string;
 }
 
 const pricingPlans: PricingPlan[] = [
   {
-    id: "starter",
-    name: "Iniciante",
-    tokens: 10,
-    price: 9.90,
-    icon: <Coins className="w-5 h-5" />,
-    features: ["10 tokens", "Uso básico", "Suporte por email"],
+    id: "free",
+    name: "Gratuito",
+    dailyTokens: PLAN_LIMITS.free,
+    price: 0,
+    priceLabel: "Grátis",
+    icon: <Sparkles className="w-5 h-5" />,
+    features: [
+      `${PLAN_LIMITS.free} tokens por dia`,
+      "Reset diário às 00:00",
+      "Todos os recursos básicos",
+      "Suporte por email"
+    ],
+    gradient: "from-gray-500/10 to-gray-500/5",
+  },
+  {
+    id: "basic",
+    name: "Básico",
+    dailyTokens: PLAN_LIMITS.basic,
+    price: 19.90,
+    priceLabel: "R$ 19,90/mês",
+    icon: <Zap className="w-5 h-5" />,
+    popular: true,
+    features: [
+      `${PLAN_LIMITS.basic} tokens por dia`,
+      "Reset diário às 00:00",
+      "Melhor custo-benefício",
+      "Suporte prioritário"
+    ],
+    gradient: "from-blue-500/10 to-blue-500/5",
   },
   {
     id: "pro",
-    name: "Profissional",
-    tokens: 50,
-    price: 29.90,
-    icon: <Zap className="w-5 h-5" />,
-    popular: true,
-    features: ["50 tokens", "Melhor custo-benefício", "Suporte prioritário"],
+    name: "Pro",
+    dailyTokens: PLAN_LIMITS.pro,
+    price: 49.90,
+    priceLabel: "R$ 49,90/mês",
+    icon: <Crown className="w-5 h-5" />,
+    features: [
+      `${PLAN_LIMITS.pro} tokens por dia`,
+      "Reset diário às 00:00",
+      "Uso profissional",
+      "Suporte prioritário 24/7"
+    ],
+    gradient: "from-purple-500/10 to-purple-500/5",
   },
   {
-    id: "enterprise",
-    name: "Empresarial",
-    tokens: 200,
-    price: 79.90,
-    icon: <Crown className="w-5 h-5" />,
-    features: ["200 tokens", "Uso ilimitado*", "Suporte 24/7"],
+    id: "unlimited",
+    name: "Ilimitado",
+    dailyTokens: "∞",
+    price: 99.90,
+    priceLabel: "R$ 99,90/mês",
+    icon: <Infinity className="w-5 h-5" />,
+    features: [
+      "Tokens ilimitados",
+      "Sem restrições diárias",
+      "Uso empresarial",
+      "Suporte VIP 24/7"
+    ],
+    gradient: "from-amber-500/10 to-amber-500/5",
   },
 ];
 
 interface PricingModalProps {
   open: boolean;
   onClose: () => void;
-  onSelectPlan: (tokens: number) => void;
+  onSelectPlan: (plan: PlanType) => void;
   pendingAction?: TokenAction | null;
   currentTokens: number;
 }
@@ -63,90 +101,117 @@ const PricingModal = ({
   currentTokens 
 }: PricingModalProps) => {
   const handleSelectPlan = (plan: PricingPlan) => {
-    // In a real app, this would integrate with a payment provider
-    onSelectPlan(plan.tokens);
+    onSelectPlan(plan.id);
     onClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Sparkles className="w-6 h-6 text-primary" />
-          </div>
-          <DialogTitle className="text-2xl">
-            {pendingAction 
-              ? "Tokens insuficientes" 
-              : "Adquirir mais tokens"}
-          </DialogTitle>
-          <DialogDescription className="text-base">
-            {pendingAction ? (
-              <>
-                Você precisa de <strong>{pendingAction.cost} tokens</strong> para {pendingAction.name.toLowerCase()}, 
-                mas só tem <strong>{currentTokens}</strong>. Escolha um plano para continuar.
-              </>
-            ) : (
-              "Escolha um plano que se adapte às suas necessidades."
-            )}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          {pricingPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative rounded-xl border-2 p-5 transition-all hover:shadow-lg ${
-                plan.popular 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                    Popular
-                  </span>
+      <DialogContent className="sm:max-w-6xl w-[95vw] p-0 overflow-hidden border-none bg-transparent shadow-2xl">
+        <div className="bg-background/95 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            {/* Header Section - Left Side */}
+            <div className="w-full md:w-1/4 space-y-6">
+              <div className="space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Sparkles className="w-6 h-6 text-primary" />
                 </div>
-              )}
-
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`p-2 rounded-lg ${plan.popular ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
-                  {plan.icon}
-                </div>
-                <h3 className="font-semibold text-lg">{plan.name}</h3>
+                <DialogTitle className="text-3xl font-bold tracking-tight">
+                  {pendingAction ? "Tokens insuficientes" : "Escolha seu plano"}
+                </DialogTitle>
+                <DialogDescription className="text-base text-muted-foreground leading-relaxed">
+                  {pendingAction ? (
+                    <span>
+                      Você precisa de <strong className="text-foreground">{pendingAction.cost} tokens</strong> para esta ação.
+                    </span>
+                  ) : (
+                    "Potencialize sua criação de contratos com nossos planos flexíveis."
+                  )}
+                </DialogDescription>
               </div>
 
-              <div className="mb-4">
-                <span className="text-3xl font-bold">
-                  R${plan.price.toFixed(2).replace('.', ',')}
-                </span>
+              {/* Token Costs - Compact */}
+              <div className="bg-secondary/30 rounded-xl p-4 border border-border/50">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Custos de Tokens</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Criar e Editar</span>
+                    <span className="font-medium text-green-500 bg-green-500/10 px-2 py-0.5 rounded text-xs">Grátis</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Carregar Histórico</span>
+                    <span className="font-medium text-green-500 bg-green-500/10 px-2 py-0.5 rounded text-xs">Grátis</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Exportar PDF</span>
+                    <span className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded text-xs">10 tokens</span>
+                  </div>
+                </div>
               </div>
-
-              <ul className="space-y-2 mb-5">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={() => handleSelectPlan(plan)}
-                className={`w-full ${plan.popular ? "" : "variant-outline"}`}
-                variant={plan.popular ? "default" : "outline"}
-              >
-                Selecionar
-              </Button>
+              
+              <div className="text-xs text-muted-foreground pt-4 border-t border-border">
+                💡 Tokens resetam diariamente às 00:00
+              </div>
             </div>
-          ))}
-        </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            * Uso ilimitado sujeito a termos de uso razoável. Pagamento único.
-          </p>
+            {/* Plans Grid - Right Side */}
+            <div className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {pricingPlans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={`relative group rounded-xl border p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col bg-card/50 hover:bg-card ${
+                    plan.popular 
+                      ? "border-primary/50 shadow-primary/5 ring-1 ring-primary/20" 
+                      : "border-border/50 hover:border-primary/20"
+                  }`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 inset-x-0 flex justify-center">
+                      <span className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                        Melhor Escolha
+                      </span>
+                    </div>
+                  )}
+
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    {plan.icon}
+                  </div>
+
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-lg">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-2xl font-bold">{typeof plan.dailyTokens === 'number' ? plan.dailyTokens : '∞'}</span>
+                      <span className="text-xs text-muted-foreground font-medium">tokens/dia</span>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-2 mb-6 flex-grow">
+                    {plan.features.slice(2).map((feature, index) => ( // Showing only distinct features
+                      <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">{feature}</span>
+                      </li>
+                    ))}
+                    <li className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                      <span>Reset diário 00:00</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-4 mt-auto border-t border-border/50">
+                    <div className="text-sm font-semibold mb-3 text-center">{plan.priceLabel}</div>
+                    <Button
+                      onClick={() => handleSelectPlan(plan)}
+                      className="w-full h-9 text-xs font-semibold shadow-sm"
+                      variant={plan.popular ? "default" : "outline"}
+                    >
+                      {plan.price === 0 ? "Começar Grátis" : "Selecionar Plano"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

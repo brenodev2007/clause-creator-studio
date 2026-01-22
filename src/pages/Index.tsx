@@ -55,11 +55,12 @@ const Index = () => {
   const previewRef = useRef<HTMLDivElement>(null);
   const { savedContracts, saveContract, deleteContract, clearHistory } = useContractHistory();
   const { 
-    tokens, 
+    tokens,
+    dailyLimit,
     showPricingModal, 
     pendingAction,
     consumeTokens, 
-    addTokens, 
+    upgradePlan, 
     closePricingModal,
     setShowPricingModal 
   } = useTokens();
@@ -70,7 +71,7 @@ const Index = () => {
     const saved = saveContract(contractData);
     toast({
       title: "Contrato salvo",
-      description: `"${saved.name}" foi adicionado ao histórico. (-1 token)`,
+      description: `"${saved.name}" foi adicionado ao histórico.`,
     });
   };
 
@@ -80,7 +81,7 @@ const Index = () => {
     setContractData(contract.data);
     toast({
       title: "Contrato carregado",
-      description: `"${contract.name}" foi restaurado. (-1 token)`,
+      description: `"${contract.name}" foi restaurado.`,
     });
   };
 
@@ -125,15 +126,15 @@ const Index = () => {
     }));
     toast({
       title: "Modelo aplicado",
-      description: `${template.clauses.length} cláusulas adicionadas. (-1 token)`,
+      description: `${template.clauses.length} cláusulas adicionadas.`,
     });
   };
 
-  const handleBuyTokens = (amount: number) => {
-    addTokens(amount);
+  const handleUpgradePlan = (plan: import("@/hooks/use-tokens").PlanType) => {
+    upgradePlan(plan);
     toast({
-      title: "Tokens adicionados!",
-      description: `+${amount} tokens foram adicionados à sua conta.`,
+      title: "Plano atualizado!",
+      description: `Seu plano foi atualizado com sucesso. Tokens resetam diariamente às 00:00.`,
     });
   };
 
@@ -179,7 +180,7 @@ const Index = () => {
       
       toast({
         title: "PDF gerado",
-        description: `Arquivo ${fileName} baixado. (-3 tokens)`,
+        description: `Arquivo ${fileName} baixado. (-10 tokens)`,
       });
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
@@ -198,7 +199,7 @@ const Index = () => {
       <PricingModal
         open={showPricingModal}
         onClose={closePricingModal}
-        onSelectPlan={handleBuyTokens}
+        onSelectPlan={handleUpgradePlan}
         pendingAction={pendingAction}
         currentTokens={tokens}
       />
@@ -211,7 +212,8 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2">
               <TokenDisplay 
-                tokens={tokens} 
+                tokens={tokens}
+                dailyLimit={dailyLimit}
                 onBuyTokens={() => setShowPricingModal(true)} 
               />
               <ThemeToggle />
@@ -237,16 +239,102 @@ const Index = () => {
       </header>
 
       {/* Hero */}
-      <section className="border-b border-border bg-background">
-        <div className="max-w-5xl mx-auto px-6 py-16">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            Crie contratos profissionais
-          </h1>
-          <p className="mt-3 text-muted-foreground max-w-xl">
-            Preencha os dados, escolha um modelo e exporte em PDF. 
-            Simples, rápido e sem complicações.
-          </p>
+      <section className="relative border-b border-border bg-background overflow-hidden">
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Gradient Orbs */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-primary/8 via-primary/4 to-transparent rounded-full blur-3xl" />
+          
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)] opacity-10" />
         </div>
+
+        <div className="max-w-5xl mx-auto px-6 py-20 md:py-24 relative">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-6">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                <span className="text-xs font-medium text-foreground">Plataforma Profissional</span>
+              </div>
+
+              {/* Title with Gradient Accent */}
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+                <span className="text-foreground">Crie contratos </span>
+                <span className="bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+                  profissionais
+                </span>
+              </h1>
+
+              {/* Description */}
+              <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
+                Preencha os dados, escolha um modelo e exporte em PDF. 
+                Simples, rápido e sem complicações.
+              </p>
+
+              {/* Features List with Icons */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                {[
+                  { text: "Modelos prontos", icon: "📄" },
+                  { text: "Exportação PDF", icon: "⬇️" },
+                  { text: "Assinatura digital", icon: "✍️" },
+                  { text: "100% seguro", icon: "🔒" }
+                ].map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-2 group">
+                    <div className="w-6 h-6 rounded-md bg-primary/5 flex items-center justify-center text-xs group-hover:bg-primary/10 transition-colors">
+                      {feature.icon}
+                    </div>
+                    <span className="text-sm text-muted-foreground">{feature.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Content - Enhanced Stats */}
+            <div className="hidden md:grid grid-cols-2 gap-4">
+              {/* Stat Card 1 */}
+              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all group">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-3xl font-semibold text-foreground group-hover:scale-105 transition-transform">99%</div>
+                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">Taxa de Sucesso</div>
+              </div>
+
+              {/* Stat Card 2 */}
+              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all group">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-3xl font-semibold text-foreground group-hover:scale-105 transition-transform">5min</div>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <div className="w-3 h-3 rounded-full bg-blue-500/50" />
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">Tempo Médio</div>
+              </div>
+
+              {/* Feature Card */}
+              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all col-span-2 group">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Download className="w-6 h-6 text-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground mb-0.5">Exportação Rápida</div>
+                    <div className="text-sm text-muted-foreground">PDF profissional em segundos</div>
+                  </div>
+                  <div className="w-2 h-2 rounded-full bg-primary/30" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Accent Line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       </section>
 
       {/* Main Content */}
