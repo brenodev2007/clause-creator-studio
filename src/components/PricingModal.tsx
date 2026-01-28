@@ -25,63 +25,48 @@ const pricingPlans: PricingPlan[] = [
   {
     id: "free",
     name: "Gratuito",
-    dailyTokens: PLAN_LIMITS.free,
+    dailyTokens: 10,
     price: 0,
     priceLabel: "Grátis",
-    icon: <Sparkles className="w-5 h-5" />,
+    icon: <Sparkles className="w-6 h-6" />,
     features: [
-      `${PLAN_LIMITS.free} tokens por dia`,
+      "10 tokens por dia",
       "Reset diário às 00:00",
-      "Todos os recursos básicos",
+      "Recursos básicos",
       "Suporte por email"
     ],
-    gradient: "from-gray-500/10 to-gray-500/5",
-  },
-  {
-    id: "basic",
-    name: "Básico",
-    dailyTokens: PLAN_LIMITS.basic,
-    price: 19.90,
-    priceLabel: "R$ 19,90/mês",
-    icon: <Zap className="w-5 h-5" />,
-    popular: true,
-    features: [
-      `${PLAN_LIMITS.basic} tokens por dia`,
-      "Reset diário às 00:00",
-      "Melhor custo-benefício",
-      "Suporte prioritário"
-    ],
-    gradient: "from-blue-500/10 to-blue-500/5",
+    gradient: "from-zinc-500/20 to-gray-500/20",
   },
   {
     id: "pro",
     name: "Pro",
-    dailyTokens: PLAN_LIMITS.pro,
-    price: 49.90,
-    priceLabel: "R$ 49,90/mês",
-    icon: <Crown className="w-5 h-5" />,
+    dailyTokens: 50,
+    price: 19.90,
+    priceLabel: "R$ 19,90/mês",
+    icon: <Crown className="w-6 h-6" />,
+    popular: true,
     features: [
-      `${PLAN_LIMITS.pro} tokens por dia`,
+      "50 tokens por dia",
       "Reset diário às 00:00",
       "Uso profissional",
-      "Suporte prioritário 24/7"
+      "Suporte prioritário"
     ],
-    gradient: "from-purple-500/10 to-purple-500/5",
+    gradient: "from-purple-500/20 to-pink-500/20",
   },
   {
     id: "unlimited",
     name: "Ilimitado",
     dailyTokens: "∞",
-    price: 99.90,
-    priceLabel: "R$ 99,90/mês",
-    icon: <Infinity className="w-5 h-5" />,
+    price: 39.90,
+    priceLabel: "R$ 39,90/mês",
+    icon: <Infinity className="w-6 h-6" />,
     features: [
       "Tokens ilimitados",
       "Sem restrições diárias",
       "Uso empresarial",
       "Suporte VIP 24/7"
     ],
-    gradient: "from-amber-500/10 to-amber-500/5",
+    gradient: "from-amber-500/20 to-yellow-500/20",
   },
 ];
 
@@ -91,6 +76,7 @@ interface PricingModalProps {
   onSelectPlan: (plan: PlanType) => void;
   pendingAction?: TokenAction | null;
   currentTokens: number;
+  currentPlan?: PlanType;
 }
 
 const PricingModal = ({ 
@@ -98,7 +84,8 @@ const PricingModal = ({
   onClose, 
   onSelectPlan, 
   pendingAction,
-  currentTokens 
+  currentTokens,
+  currentPlan = 'free'
 }: PricingModalProps) => {
   const handleSelectPlan = (plan: PricingPlan) => {
     onSelectPlan(plan.id);
@@ -109,9 +96,9 @@ const PricingModal = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-6xl w-[95vw] p-0 overflow-hidden border-none bg-transparent shadow-2xl">
         <div className="bg-background/95 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div className="flex flex-col md:flex-row gap-4 lg:gap-8 items-start">
             {/* Header Section - Left Side */}
-            <div className="w-full md:w-1/4 space-y-6">
+            <div className="w-full md:w-1/4 space-y-6 shrink-0">
               <div className="space-y-2">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <Sparkles className="w-6 h-6 text-primary" />
@@ -155,14 +142,14 @@ const PricingModal = ({
             </div>
 
             {/* Plans Grid - Right Side */}
-            <div className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
               {pricingPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`relative group rounded-xl border p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col bg-card/50 hover:bg-card ${
+                  className={`relative group rounded-2xl border p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col h-full justify-between ${
                     plan.popular 
-                      ? "border-primary/50 shadow-primary/5 ring-1 ring-primary/20" 
-                      : "border-border/50 hover:border-primary/20"
+                      ? "bg-card dark:bg-gradient-to-b dark:from-zinc-900 dark:via-zinc-900 dark:to-black border-primary shadow-lg ring-1 ring-primary/20 scale-105 z-10" 
+                      : "bg-card/50 hover:bg-card border-border hover:border-primary/20"
                   }`}
                 >
                   {plan.popular && (
@@ -178,9 +165,9 @@ const PricingModal = ({
                   </div>
 
                   <div className="mb-4">
-                    <h3 className="font-semibold text-lg">{plan.name}</h3>
+                    <h3 className="font-semibold text-lg text-foreground">{plan.name}</h3>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-2xl font-bold">{typeof plan.dailyTokens === 'number' ? plan.dailyTokens : '∞'}</span>
+                      <span className="text-2xl font-bold text-foreground">{typeof plan.dailyTokens === 'number' ? plan.dailyTokens : '∞'}</span>
                       <span className="text-xs text-muted-foreground font-medium">tokens/dia</span>
                     </div>
                   </div>
@@ -199,13 +186,18 @@ const PricingModal = ({
                   </ul>
 
                   <div className="pt-4 mt-auto border-t border-border/50">
-                    <div className="text-sm font-semibold mb-3 text-center">{plan.priceLabel}</div>
+                    <div className="text-sm font-semibold mb-3 text-center text-muted-foreground">{plan.priceLabel}</div>
                     <Button
                       onClick={() => handleSelectPlan(plan)}
                       className="w-full h-9 text-xs font-semibold shadow-sm"
                       variant={plan.popular ? "default" : "outline"}
+                      disabled={currentPlan === plan.id}
                     >
-                      {plan.price === 0 ? "Começar Grátis" : "Selecionar Plano"}
+                      {currentPlan === plan.id 
+                        ? "Seu Plano Atual" 
+                        : plan.price === 0 
+                          ? "Voltar para Grátis" 
+                          : "Assinar Agora"}
                     </Button>
                   </div>
                 </div>

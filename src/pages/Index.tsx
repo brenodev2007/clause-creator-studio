@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
 import ContractHistory from "@/components/ContractHistory";
@@ -64,6 +66,22 @@ const Index = () => {
     closePricingModal,
     setShowPricingModal 
   } = useTokens();
+
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
+  const requireAuth = (action: () => void) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Necessário",
+        description: "Você precisa entrar na sua conta para realizar esta ação.",
+        variant: "default",
+      });
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    action();
+  };
 
   const handleSaveContract = () => {
     if (!consumeTokens("save-contract")) return;
@@ -199,7 +217,7 @@ const Index = () => {
       <PricingModal
         open={showPricingModal}
         onClose={closePricingModal}
-        onSelectPlan={handleUpgradePlan}
+        onSelectPlan={(plan) => requireAuth(() => handleUpgradePlan(plan))}
         pendingAction={pendingAction}
         currentTokens={tokens}
       />
@@ -210,29 +228,50 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Logo" className="h-20 md:h-20 w-auto object-contain" />
             </div>
-            <div className="flex items-center gap-2">
-              <TokenDisplay 
-                tokens={tokens}
-                dailyLimit={dailyLimit}
-                onBuyTokens={() => setShowPricingModal(true)} 
-              />
+            <div className="flex items-center gap-4">
               <ThemeToggle />
-              <Button
-                onClick={handleSaveContract}
-                variant="outline"
-                className="h-9 px-4 rounded-md"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                Salvar
-              </Button>
-              <Button
-                onClick={generatePDF}
-                disabled={isGenerating}
-                className="btn-primary h-9 px-4 rounded-md"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {isGenerating ? "Gerando..." : "Exportar PDF"}
-              </Button>
+              
+              {isAuthenticated ? (
+                <>
+                  <TokenDisplay 
+                    tokens={tokens}
+                    dailyLimit={dailyLimit}
+                    onBuyTokens={() => setShowPricingModal(true)} 
+                  />
+                   <Button
+                    onClick={() => requireAuth(handleSaveContract)}
+                    variant="outline"
+                    className="h-9 px-4 rounded-md hidden sm:flex"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
+                  </Button>
+                  <Button
+                    onClick={() => requireAuth(generatePDF)}
+                    disabled={isGenerating}
+                    className="btn-primary h-9 px-4 rounded-md hidden sm:flex"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    {isGenerating ? "Gerando..." : "Exportar PDF"}
+                  </Button>
+                  
+                  {/* Profile Dropdown or Link */}
+                  <Link to="/profile">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer">
+                       <span className="text-sm font-bold text-primary">{user?.name?.charAt(0) || 'U'}</span>
+                    </div>
+                  </Link>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link to="/login">
+                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Entrar</Button>
+                  </Link>
+                   <Link to="/register">
+                    <Button className="h-9 px-4 rounded-md shadow-lg shadow-primary/20">Criar Conta</Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Sparkles, ArrowRight, User, Mail, Lock } from 'lucide-react';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -11,10 +12,16 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  // Get redirect path
+  const redirectPath = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
@@ -29,67 +36,110 @@ const Register = () => {
       if (response.ok) {
         login(data.token);
         toast({
-          title: "Registration Successful",
-          description: "Welcome!",
+          title: "Conta Criada!",
+          description: "Bem-vindo ao Clause Creator Studio.",
         });
-        navigate('/');
+        navigate(redirectPath);
       } else {
         toast({
           variant: "destructive",
-          title: "Registration Failed",
-          description: data.msg || "Could not register",
+          title: "Erro no Cadastro",
+          description: data.msg || "Não foi possível criar sua conta.",
         });
       }
     } catch (error) {
+      console.error("Register error", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Something went wrong.",
+        title: "Erro de Conexão",
+        description: "Não foi possível conectar ao servidor.",
       });
+    } finally {
+        setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-lg border">
-        <h2 className="text-3xl font-bold text-center text-foreground">Register</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-foreground">Name</label>
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full"
-            />
+    <div className="flex items-center justify-center min-h-screen w-full bg-background overflow-hidden relative">
+      
+       {/* Ambient Bacgkround */}
+       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-3xl opacity-30 animate-pulse" />
+          <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl opacity-30" />
+       </div>
+
+      <div className="w-full max-w-md p-8 relative z-10 animate-in fade-in zoom-in-95 duration-500">
+        <div className="bg-card/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-8 space-y-8">
+          
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Criar Conta</h2>
+            <p className="text-muted-foreground text-sm">Comece a usar nossa IA hoje mesmo.</p>
           </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-foreground">Email</label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full"
-            />
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Nome Completo</label>
+              <div className="relative group">
+                <User className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  type="text"
+                  placeholder="Seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="pl-10 h-11 bg-background/50 border-input/50 focus:bg-background transition-all rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Email</label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pl-10 h-11 bg-background/50 border-input/50 focus:bg-background transition-all rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Senha</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  type="password"
+                  placeholder="No mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pl-10 h-11 bg-background/50 border-input/50 focus:bg-background transition-all rounded-xl"
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20" disabled={loading}>
+              {loading ? "Criando..." : "Cadastrar Grátis"}
+              {!loading && <Sparkles className="w-5 h-5 ml-2" />}
+            </Button>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background/0 backdrop-blur-md px-2 text-muted-foreground font-medium">Ou</span>
+            </div>
           </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-foreground">Password</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full"
-            />
+
+          <div className="text-center text-sm text-muted-foreground">
+            Já tem uma conta? <a href={`/login${redirectPath !== '/' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="text-primary font-bold hover:underline">Fazer Login</a>
           </div>
-          <Button type="submit" className="w-full">
-            Register
-          </Button>
-        </form>
-        <div className="text-center text-sm">
-          Already have an account? <a href="/login" className="text-primary hover:underline">Login</a>
         </div>
       </div>
     </div>
