@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "contract-tokens-v2";
 
-export type PlanType = "free" | "basic" | "pro" | "unlimited";
+export type PlanType = "free" | "pro" | "unlimited";
 
 export interface TokenAction {
   id: string;
@@ -25,8 +25,7 @@ export const TOKEN_ACTIONS: TokenAction[] = [
 
 export const PLAN_LIMITS: Record<PlanType, number> = {
   free: 10,
-  basic: 50,
-  pro: 200,
+  pro: 50,
   unlimited: 999999,
 };
 
