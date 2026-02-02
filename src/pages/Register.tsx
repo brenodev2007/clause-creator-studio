@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Sparkles, ArrowRight, User, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { TermsOfService } from "@/components/TermsOfService";
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -20,12 +24,23 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate terms acceptance
+    if (!acceptedTerms) {
+      toast({
+        variant: "destructive",
+        title: "Termos não aceitos",
+        description: "Você precisa aceitar os Termos de Uso para criar uma conta.",
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, acceptedTerms }),
       });
 
       const data = await response.json();
@@ -149,6 +164,32 @@ const Register = () => {
                </div>
              </div>
 
+             {/* Terms of Service Acceptance */}
+             <div className="flex items-start space-x-3 py-2">
+               <Checkbox 
+                 id="terms" 
+                 checked={acceptedTerms}
+                 onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                 className="mt-1"
+               />
+               <label 
+                 htmlFor="terms" 
+                 className="text-sm text-muted-foreground leading-relaxed cursor-pointer select-none"
+               >
+                 Eu li e aceito os{' '}
+                 <button
+                   type="button"
+                   onClick={(e) => {
+                     e.preventDefault();
+                     setShowTerms(true);
+                   }}
+                   className="text-primary font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                 >
+                   Termos de Uso e Serviço
+                 </button>
+               </label>
+             </div>
+
              <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-blue-500/20" disabled={loading}>
                {loading ? "Criando..." : "Começar Agora"}
                {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
@@ -163,6 +204,9 @@ const Register = () => {
            </div>
          </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      <TermsOfService open={showTerms} onOpenChange={setShowTerms} />
 
     </div>
   );
