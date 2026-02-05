@@ -161,18 +161,19 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
         <SectionTitle>Dados do Contratado</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="contractorName" className="text-sm">Razão Social</Label>
+            <Label htmlFor="contractorName" className="text-sm">Razão Social <span className="text-destructive">*</span></Label>
             <Input
               id="contractorName"
               value={data.contractor.name}
               onChange={(e) => handleContractorChange("name", e.target.value)}
               placeholder="Nome da empresa"
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="cnpj" className="text-sm flex items-center gap-2">
-              CNPJ
+              CNPJ <span className="text-destructive">*</span>
               {contractorCnpjValidation.complete && (
                 contractorCnpjValidation.valid ? (
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -191,10 +192,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="00.000.000/0000-00"
               maxLength={18}
               className={`h-10 ${contractorCnpjValidation.complete && !contractorCnpjValidation.valid ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contractorEmail" className="text-sm">E-mail</Label>
+            <Label htmlFor="contractorEmail" className="text-sm">E-mail <span className="text-destructive">*</span></Label>
             <Input
               id="contractorEmail"
               type="email"
@@ -202,10 +204,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               onChange={(e) => handleContractorChange("email", e.target.value)}
               placeholder="contato@empresa.com"
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contractorPhone" className="text-sm">Telefone</Label>
+            <Label htmlFor="contractorPhone" className="text-sm">Telefone <span className="text-destructive">*</span></Label>
             <Input
               id="contractorPhone"
               value={data.contractor.phone}
@@ -213,16 +216,18 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="(00) 00000-0000"
               maxLength={15}
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="contractorAddress" className="text-sm">Endereço</Label>
+            <Label htmlFor="contractorAddress" className="text-sm">Endereço <span className="text-destructive">*</span></Label>
             <Input
               id="contractorAddress"
               value={data.contractor.address}
               onChange={(e) => handleContractorChange("address", e.target.value)}
               placeholder="Rua, número, bairro, cidade - UF, CEP"
               className="h-10"
+              required
             />
           </div>
         </div>
@@ -233,17 +238,18 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
         <SectionTitle>Dados Bancários</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="bankName" className="text-sm">Banco</Label>
+            <Label htmlFor="bankName" className="text-sm">Banco <span className="text-destructive">*</span></Label>
             <Input
               id="bankName"
               value={data.contractor.bankName}
               onChange={(e) => handleContractorChange("bankName", e.target.value)}
               placeholder="Nome do banco"
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bankAgency" className="text-sm">Agência</Label>
+            <Label htmlFor="bankAgency" className="text-sm">Agência <span className="text-destructive">*</span></Label>
             <Input
               id="bankAgency"
               value={data.contractor.bankAgency}
@@ -251,10 +257,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="0000-0"
               maxLength={6}
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bankAccount" className="text-sm">Conta</Label>
+            <Label htmlFor="bankAccount" className="text-sm">Conta <span className="text-destructive">*</span></Label>
             <Input
               id="bankAccount"
               value={data.contractor.bankAccount}
@@ -262,16 +269,18 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="00000-0"
               maxLength={14}
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2 md:col-span-3">
-            <Label htmlFor="pixKey" className="text-sm">Chave PIX</Label>
+            <Label htmlFor="pixKey" className="text-sm">Chave PIX <span className="text-destructive">*</span></Label>
             <Input
               id="pixKey"
               value={data.contractor.pixKey}
               onChange={(e) => handleContractorChange("pixKey", e.target.value)}
               placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
               className="h-10"
+              required
             />
           </div>
         </div>
@@ -282,18 +291,19 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
         <SectionTitle>Dados do Cliente</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm">Nome / Razão Social</Label>
+            <Label htmlFor="name" className="text-sm">Nome / Razão Social <span className="text-destructive">*</span></Label>
             <Input
               id="name"
               value={data.client.name}
               onChange={(e) => handleClientChange("name", e.target.value)}
               placeholder="Nome do cliente"
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="document" className="text-sm flex items-center gap-2">
-              CPF / CNPJ
+              CPF / CNPJ <span className="text-destructive">*</span>
               {clientDocumentValidation.type !== 'incomplete' && clientDocumentValidation.type !== 'empty' && (
                 clientDocumentValidation.valid ? (
                   <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
@@ -315,10 +325,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="000.000.000-00"
               maxLength={18}
               className={`h-10 ${clientDocumentValidation.type !== 'incomplete' && clientDocumentValidation.type !== 'empty' && !clientDocumentValidation.valid ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm">E-mail</Label>
+            <Label htmlFor="email" className="text-sm">E-mail <span className="text-destructive">*</span></Label>
             <Input
               id="email"
               type="email"
@@ -326,10 +337,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               onChange={(e) => handleClientChange("email", e.target.value)}
               placeholder="email@exemplo.com"
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm">Telefone</Label>
+            <Label htmlFor="phone" className="text-sm">Telefone <span className="text-destructive">*</span></Label>
             <Input
               id="phone"
               value={data.client.phone}
@@ -337,16 +349,18 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="(00) 00000-0000"
               maxLength={15}
               className="h-10"
+              required
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address" className="text-sm">Endereço</Label>
+            <Label htmlFor="address" className="text-sm">Endereço <span className="text-destructive">*</span></Label>
             <Input
               id="address"
               value={data.client.address}
               onChange={(e) => handleClientChange("address", e.target.value)}
               placeholder="Rua, número, bairro, cidade - UF"
               className="h-10"
+              required
             />
           </div>
         </div>
@@ -357,7 +371,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
         <SectionTitle>Detalhes do Contrato</SectionTitle>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="serviceDescription" className="text-sm">Descrição do Serviço</Label>
+            <Label htmlFor="serviceDescription" className="text-sm">Descrição do Serviço <span className="text-destructive">*</span></Label>
             <Textarea
               id="serviceDescription"
               value={data.serviceDescription}
@@ -365,11 +379,12 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder="Descreva detalhadamente o serviço..."
               rows={4}
               className="resize-none"
+              required
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm">Valor Total (R$)</Label>
+              <Label htmlFor="price" className="text-sm">Valor Total (R$) <span className="text-destructive">*</span></Label>
               <Input
                 id="price"
                 type="number"
@@ -377,13 +392,16 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
                 onChange={(e) => handleChange("price", formatCurrency(e.target.value))}
                 placeholder="0,00"
                 className="h-10"
+                required
+                min="0.01"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="paymentMethod" className="text-sm">Forma de Pagamento</Label>
+              <Label htmlFor="paymentMethod" className="text-sm">Forma de Pagamento <span className="text-destructive">*</span></Label>
               <Select
                 value={data.paymentMethod}
                 onValueChange={(value) => handleChange("paymentMethod", value)}
+                required
               >
                 <SelectTrigger className="h-10">
                   <SelectValue placeholder="Selecione" />
@@ -400,23 +418,25 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate" className="text-sm">Data de Início</Label>
+              <Label htmlFor="startDate" className="text-sm">Data de Início <span className="text-destructive">*</span></Label>
               <Input
                 id="startDate"
                 type="date"
                 value={data.startDate}
                 onChange={(e) => handleChange("startDate", e.target.value)}
                 className="h-10"
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="deadline" className="text-sm">Prazo de Entrega</Label>
+              <Label htmlFor="deadline" className="text-sm">Prazo de Entrega <span className="text-destructive">*</span></Label>
               <Input
                 id="deadline"
                 type="date"
                 value={data.deadline}
                 onChange={(e) => handleChange("deadline", e.target.value)}
                 className="h-10"
+                required
               />
             </div>
           </div>

@@ -83,7 +83,46 @@ const Index = () => {
     action();
   };
 
+  const validateRequiredFields = (): boolean => {
+    const requiredFields = [
+      { value: contractData.contractor.name, label: "Razão Social do Contratado" },
+      { value: contractData.contractor.cnpj, label: "CNPJ" },
+      { value: contractData.contractor.email, label: "E-mail do Contratado" },
+      { value: contractData.contractor.phone, label: "Telefone do Contratado" },
+      { value: contractData.contractor.address, label: "Endereço do Contratado" },
+      { value: contractData.contractor.bankName, label: "Banco" },
+      { value: contractData.contractor.bankAgency, label: "Agência" },
+      { value: contractData.contractor.bankAccount, label: "Conta" },
+      { value: contractData.contractor.pixKey, label: "Chave PIX" },
+      { value: contractData.client.name, label: "Nome do Cliente" },
+      { value: contractData.client.document, label: "CPF/CNPJ do Cliente" },
+      { value: contractData.client.email, label: "E-mail do Cliente" },
+      { value: contractData.client.phone, label: "Telefone do Cliente" },
+      { value: contractData.client.address, label: "Endereço do Cliente" },
+      { value: contractData.serviceDescription, label: "Descrição do Serviço" },
+      { value: contractData.price > 0 ? "valid" : "", label: "Valor Total" },
+      { value: contractData.paymentMethod, label: "Forma de Pagamento" },
+      { value: contractData.startDate, label: "Data de Início" },
+      { value: contractData.deadline, label: "Prazo de Entrega" },
+    ];
+
+    const emptyFields = requiredFields.filter(field => !field.value || field.value.trim() === "");
+
+    if (emptyFields.length > 0) {
+      const fieldsList = emptyFields.map(f => f.label).join(", ");
+      toast({
+        title: "Campos obrigatórios não preenchidos",
+        description: `Por favor, preencha: ${fieldsList}`,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSaveContract = () => {
+    if (!validateRequiredFields()) return;
     if (!consumeTokens("save-contract")) return;
     
     const saved = saveContract(contractData);
@@ -157,6 +196,7 @@ const Index = () => {
   };
 
   const generatePDF = async () => {
+    if (!validateRequiredFields()) return;
     if (!consumeTokens("export-pdf")) return;
     
     setActiveTab("preview");
