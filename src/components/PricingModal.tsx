@@ -87,9 +87,56 @@ const PricingModal = ({
   currentTokens,
   currentPlan = 'free'
 }: PricingModalProps) => {
-  const handleSelectPlan = (plan: PricingPlan) => {
-    onSelectPlan(plan.id);
-    onClose();
+  const handleSelectPlan = async (plan: PricingPlan) => {
+    // If free plan, just update locally
+    if (plan.price === 0) {
+      onSelectPlan(plan.id);
+      onClose();
+      return;
+    }
+
+    try {
+      // Get user ID from localStorage token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Você precisa estar logado para fazer upgrade');
+        return;
+      }
+
+      // Decode token to get user ID (simple decode, not validation)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+
+      // Create payment preference
+      const response = await fetch('http://localhost:5000/api/payment/create_preference', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: `Plano ${plan.name} - ContrateMe`,
+          quantity: 1,
+          price: plan.price,
+          userId: userId,
+          plan: plan.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.sandbox_init_point) {
+        // Redirect to Mercado Pago checkout (sandbox for testing)
+        window.location.href = data.sandbox_init_point;
+      } else if (data.init_point) {
+        // Production checkout
+        window.location.href = data.init_point;
+      } else {
+        alert('Erro ao criar preferência de pagamento');
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      alert('Erro ao processar pagamento. Tente novamente.');
+    }
   };
 
   return (
