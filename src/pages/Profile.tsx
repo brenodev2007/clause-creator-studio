@@ -3,17 +3,19 @@ import { useTokens } from "../hooks/use-tokens";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, CreditCard, User as UserIcon, Shield, Mail } from "lucide-react";
+import { LogOut, CreditCard, User as UserIcon, ArrowLeft } from "lucide-react";
 import PricingModal from "../components/PricingModal";
-import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { user, logout } = useAuth();
   const { plan, dailyLimit, showPricingModal, setShowPricingModal, tokens, upgradePlan } = useTokens();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/';
+    navigate("/");
   };
 
   const getPlanLabel = (p: string) => {
@@ -25,103 +27,110 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-background p-4 md:p-8 pt-20 flex justify-center">
-      <div className="w-full max-w-4xl space-y-8 animate-in fade-in-50 duration-500">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-card rounded-3xl border border-border shadow-sm">
-          <Avatar className="w-24 h-24 border-4 border-background shadow-xl">
-            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || 'User'}`} />
-            <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-              {user?.name?.charAt(0) || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-center md:text-left space-y-1 flex-1">
-             <h1 className="text-3xl font-bold tracking-tight">{user?.name}</h1>
-             <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-               <Mail className="w-4 h-4" />
-               <span>{user?.email}</span>
-             </div>
+    <div className="min-h-screen w-full bg-background">
+      {/* Top Navigation */}
+      <div className="border-b border-border/40">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Voltar</span>
+          </Button>
+          <h2 className="text-sm font-medium text-muted-foreground">Perfil</h2>
+          <ThemeToggle />
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
+        {/* User Info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || 'User'}`} />
+              <AvatarFallback className="bg-muted text-foreground font-medium">
+                {user?.name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">{user?.name}</h1>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
           </div>
-          <Button variant="destructive" onClick={handleLogout} className="gap-2 rounded-xl">
+          <Button 
+            variant="outline" 
+            onClick={handleLogout} 
+            className="gap-2"
+          >
             <LogOut className="w-4 h-4" />
-            Sair da conta
+            Sair
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Plan Details */}
-          <Card className="rounded-3xl border-border shadow-sm h-full flex flex-col">
+          {/* Subscription */}
+          <Card>
             <CardHeader className="pb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
-                  <CreditCard className="w-6 h-6 text-primary" />
-                </div>
+              <div className="flex items-center gap-3">
+                <CreditCard className="w-5 h-5 text-muted-foreground" />
                 <div>
-                   <CardTitle className="text-xl">Assinatura</CardTitle>
-                   <CardDescription>Gerencie seu plano atual</CardDescription>
+                  <CardTitle className="text-base">Assinatura</CardTitle>
+                  <CardDescription className="text-xs">Seu plano atual</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <Separator />
-            <CardContent className="pt-6 flex-1 flex flex-col">
-               <div className="flex items-center justify-between mb-6">
-                  <span className="text-muted-foreground font-medium">Plano Atual</span>
-                  <span className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-wide">
-                    {getPlanLabel(plan)}
-                  </span>
-               </div>
-               
-               <div className="flex items-center justify-between mb-8">
-                  <span className="text-muted-foreground font-medium">Tokens Diários</span>
-                  <span className="font-mono font-bold text-lg">
-                    {typeof dailyLimit === 'number' ? dailyLimit : '∞'}
-                  </span>
-               </div>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-muted-foreground">Plano</span>
+                <span className="text-sm font-medium">{getPlanLabel(plan)}</span>
+              </div>
+              
+              <div className="flex items-center justify-between py-2 border-t border-border/40">
+                <span className="text-sm text-muted-foreground">Tokens diários</span>
+                <span className="text-sm font-mono font-medium">
+                  {typeof dailyLimit === 'number' ? dailyLimit : '∞'}
+                </span>
+              </div>
 
-               <div className="mt-auto">
-                 <Button onClick={() => setShowPricingModal(true)} className="w-full rounded-xl py-6 text-base shadow-primary/20 shadow-lg" size="lg">
-                   {plan === 'free' ? 'Fazer Upgrade' : 'Alterar Plano'}
-                 </Button>
-               </div>
+              <Button 
+                onClick={() => setShowPricingModal(true)} 
+                className="w-full mt-2" 
+                variant={plan === 'free' ? 'default' : 'outline'}
+              >
+                {plan === 'free' ? 'Fazer Upgrade' : 'Alterar Plano'}
+              </Button>
             </CardContent>
           </Card>
 
-           {/* Account Details (Static for now) */}
-           <Card className="rounded-3xl border-border shadow-sm h-full">
+          {/* Account */}
+          <Card>
             <CardHeader className="pb-4">
-               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2.5 bg-muted rounded-xl">
-                  <UserIcon className="w-6 h-6 text-muted-foreground" />
-                </div>
+              <div className="flex items-center gap-3">
+                <UserIcon className="w-5 h-5 text-muted-foreground" />
                 <div>
-                   <CardTitle className="text-xl">Dados da Conta</CardTitle>
-                   <CardDescription>Suas informações pessoais</CardDescription>
+                  <CardTitle className="text-base">Dados da Conta</CardTitle>
+                  <CardDescription className="text-xs">Informações pessoais</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <Separator />
-            <CardContent className="pt-6 space-y-6">
+            <CardContent className="space-y-4">
               <div className="space-y-1">
-                 <label className="text-xs uppercase font-bold text-muted-foreground tracking-wider">Nome Completo</label>
-                 <div className="p-3 bg-secondary/50 rounded-xl border border-border/50 text-foreground font-medium">
-                   {user?.name}
-                 </div>
+                <label className="text-xs text-muted-foreground">Nome</label>
+                <div className="text-sm font-medium">{user?.name}</div>
               </div>
-              <div className="space-y-1">
-                 <label className="text-xs uppercase font-bold text-muted-foreground tracking-wider">Email de Acesso</label>
-                 <div className="p-3 bg-secondary/50 rounded-xl border border-border/50 text-foreground font-medium flex items-center gap-2">
-                   <Shield className="w-4 h-4 text-green-500" />
-                   {user?.email}
-                 </div>
+              
+              <div className="space-y-1 pt-2 border-t border-border/40">
+                <label className="text-xs text-muted-foreground">Email</label>
+                <div className="text-sm font-medium truncate">{user?.email}</div>
               </div>
-              <div className="pt-2 text-xs text-muted-foreground leading-relaxed">
-                Para alterar seus dados ou senha, entre em contato com nosso suporte ou aguarde as próximas atualizações do sistema.
-              </div>
+
+              <p className="text-xs text-muted-foreground pt-2">
+                Entre em contato com o suporte para alterar seus dados.
+              </p>
             </CardContent>
           </Card>
-
         </div>
       </div>
 
@@ -132,7 +141,7 @@ const Profile = () => {
           upgradePlan(newPlan);
           setShowPricingModal(false);
         }}
-        currentTokens={tokens} // Fixed: useTokens returns 'tokens', not 'currentTokens'
+        currentTokens={tokens}
         currentPlan={plan}
       />
     </div>
