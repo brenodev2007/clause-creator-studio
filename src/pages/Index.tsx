@@ -463,10 +463,8 @@ const Index = () => {
         <div className="max-w-5xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Logo" className="h-14 md:h-16 w-auto object-contain" />
-              </div>
+            <div className="flex flex-col items-start space-y-4">
+              <img src="/logo.png" alt="Logo" className="h-14 md:h-16 w-auto object-contain" />
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Crie contratos profissionais de forma rápida e simples. 
                 Personalize, assine e exporte em PDF.
