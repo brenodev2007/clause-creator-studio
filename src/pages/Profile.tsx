@@ -33,7 +33,7 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Button
             variant="ghost"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/app")}
             className="gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4" />

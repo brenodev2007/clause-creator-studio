@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const STORAGE_KEY = "contract-tokens-v2";
 
@@ -13,7 +14,6 @@ export interface TokenAction {
 export interface TokenStorage {
   tokens: number;
   lastResetDate: string;
-  plan: PlanType;
 }
 
 export const TOKEN_ACTIONS: TokenAction[] = [
@@ -34,79 +34,66 @@ const getTodayDate = (): string => {
   return today.toISOString().split('T')[0]; // YYYY-MM-DD
 };
 
-const getStoredData = (): TokenStorage => {
-  if (typeof window === "undefined") {
-    return {
-      tokens: PLAN_LIMITS.free,
-      lastResetDate: getTodayDate(),
-      plan: "free",
-    };
-  }
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    return {
-      tokens: PLAN_LIMITS.free,
-      lastResetDate: getTodayDate(),
-      plan: "free",
-    };
-  }
-
-  try {
-    const data: TokenStorage = JSON.parse(stored);
-    const today = getTodayDate();
-    
-    // Check if we need to reset tokens (new day)
-    if (data.lastResetDate !== today) {
-      return {
-        tokens: PLAN_LIMITS[data.plan] || PLAN_LIMITS.free,
-        lastResetDate: today,
-        plan: data.plan,
-      };
-    }
-    
-    return data;
-  } catch {
-    return {
-      tokens: PLAN_LIMITS.free,
-      lastResetDate: getTodayDate(),
-      plan: "free",
-    };
-  }
-};
-
 export const useTokens = () => {
-  const [tokenData, setTokenData] = useState<TokenStorage>(getStoredData);
+  const { user } = useAuth();
+  
+  const getStoredData = useCallback((): TokenStorage => {
+    const defaultTokens = user?.daily_tokens ?? 20;
+    
+    if (typeof window === "undefined") {
+      return { tokens: defaultTokens, lastResetDate: getTodayDate() };
+    }
+
+    const stored = localStorage.getItem(STORAGE_KEY + (user?.id || ''));
+    if (!stored) {
+      return { tokens: defaultTokens, lastResetDate: getTodayDate() };
+    }
+
+    try {
+      const data: TokenStorage = JSON.parse(stored);
+      const today = getTodayDate();
+      
+      // Check if we need to reset tokens (new day)
+      if (data.lastResetDate !== today) {
+        return { tokens: defaultTokens, lastResetDate: today };
+      }
+      return data;
+    } catch {
+      return { tokens: defaultTokens, lastResetDate: getTodayDate() };
+    }
+  }, [user]);
+
+  const [tokenData, setTokenData] = useState<TokenStorage>(getStoredData());
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<TokenAction | null>(null);
 
+  // Sync tokenData when user daily_tokens changes or on mount
+  useEffect(() => {
+    setTokenData(getStoredData());
+  }, [getStoredData]);
+
   // Save to localStorage whenever tokenData changes
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tokenData));
+    if (typeof window !== "undefined" && user) {
+      localStorage.setItem(STORAGE_KEY + user.id, JSON.stringify(tokenData));
     }
-  }, [tokenData]);
+  }, [tokenData, user]);
 
-  // Check for daily reset on mount and periodically
+  // Check for daily reset periodically
   useEffect(() => {
     const checkReset = () => {
       const today = getTodayDate();
       if (tokenData.lastResetDate !== today) {
         setTokenData({
-          tokens: PLAN_LIMITS[tokenData.plan],
+          tokens: user?.daily_tokens ?? 20,
           lastResetDate: today,
-          plan: tokenData.plan,
         });
       }
     };
 
-    // Check immediately
-    checkReset();
-
-    // Check every minute
     const interval = setInterval(checkReset, 60000);
     return () => clearInterval(interval);
-  }, [tokenData.lastResetDate, tokenData.plan]);
+  }, [tokenData.lastResetDate, user]);
 
   const canPerformAction = useCallback((actionId: string): boolean => {
     const action = TOKEN_ACTIONS.find((a) => a.id === actionId);
@@ -132,11 +119,7 @@ export const useTokens = () => {
   }, [tokenData.tokens]);
 
   const upgradePlan = useCallback((plan: PlanType) => {
-    setTokenData({
-      tokens: PLAN_LIMITS[plan],
-      lastResetDate: getTodayDate(),
-      plan: plan,
-    });
+    // Legacy function, kept to not break anything if used elsewhere
   }, []);
 
   const getActionCost = useCallback((actionId: string): number => {
@@ -151,8 +134,8 @@ export const useTokens = () => {
 
   return {
     tokens: tokenData.tokens,
-    plan: tokenData.plan,
-    dailyLimit: PLAN_LIMITS[tokenData.plan],
+    plan: "free" as PlanType,
+    dailyLimit: user?.daily_tokens ?? 20,
     showPricingModal,
     pendingAction,
     canPerformAction,

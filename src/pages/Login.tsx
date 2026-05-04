@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link, Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,7 +15,11 @@ const Login = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const redirectPath = searchParams.get('redirect') || '/';
+  const redirectPath = searchParams.get('redirect') || '/app';
+
+  if (useAuth().isAuthenticated) {
+    return <Navigate to="/app" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +67,8 @@ const Login = () => {
          
          {/* Glass Card Content */}
          <div className="relative z-10 max-w-lg">
-           <div className="mb-8">
-             <img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
+           <div className="mb-8 flex justify-center lg:justify-start">
+             <img src="/logo.png" alt="Logo" className="h-32 w-auto object-contain" />
            </div>
            <h1 className="text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
              Transforme a gestão dos seus contratos.

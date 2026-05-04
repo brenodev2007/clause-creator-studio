@@ -31,14 +31,11 @@ const ContractHistory = ({
 }: ContractHistoryProps) => {
   if (contracts.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-8 text-center">
-          <History className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground text-sm">
-            Nenhum contrato salvo ainda.
-          </p>
-          <p className="text-muted-foreground/70 text-xs mt-1">
-            Clique em "Salvar" para guardar contratos no histórico.
+      <Card className="border border-border/40 bg-secondary/10 shadow-none">
+        <CardContent className="py-5 px-4 text-center">
+          <History className="w-6 h-6 mx-auto text-muted-foreground/40 mb-2" />
+          <p className="text-muted-foreground text-sm font-medium">
+            Nenhum contrato salvo.
           </p>
         </CardContent>
       </Card>

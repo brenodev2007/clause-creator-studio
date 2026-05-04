@@ -115,7 +115,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
   return (
     <div className="space-y-6">
       {/* Logo Upload */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <SectionTitle>Logo da Empresa</SectionTitle>
         <label className="block cursor-pointer">
           <div className={`border border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -157,7 +157,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Contractor Info */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <SectionTitle>Dados do Contratado</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -234,7 +234,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Bank Info */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <SectionTitle>Dados Bancários</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
@@ -287,7 +287,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Client Info */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <SectionTitle>Dados do Cliente</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -367,7 +367,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Contract Details */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <SectionTitle>Detalhes do Contrato</SectionTitle>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -444,7 +444,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Additional Clauses */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in pb-6 border-b border-border/50">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-foreground">Cláusulas</h3>
           {data.additionalClauses.length > 0 && (
@@ -575,7 +575,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </section>
 
       {/* Signatures */}
-      <section className="border border-border rounded-lg bg-card p-6 animate-in">
+      <section className="animate-in">
         <SectionTitle>Assinaturas Digitais</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <SignaturePad

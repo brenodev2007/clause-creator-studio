@@ -9,12 +9,15 @@ import ContractHistory from "@/components/ContractHistory";
 import TemplateSelector from "@/components/TemplateSelector";
 import TokenDisplay from "@/components/TokenDisplay";
 
+import { Hero } from "@/components/Hero";
+import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ContractData } from "@/types/contract";
 import { ContractTemplate } from "@/data/contractTemplates";
 import { useContractHistory, SavedContract } from "@/hooks/use-contract-history";
 import { useTokens } from "@/hooks/use-tokens";
-import { Download, Pencil, Eye, Save } from "lucide-react";
+import { Download, Pencil, Eye, Save, Shield } from "lucide-react";
+import { motion } from "framer-motion";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "@/hooks/use-toast";
@@ -254,12 +257,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+      {/* Application Navbar */}
+      <header className="border-b border-border bg-card shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Logo" className="h-20 md:h-20 w-auto object-contain" />
+            <div className="relative h-10 w-32 md:w-40 shrink-0">
+              <img src="/logo.png" alt="Logo" className="absolute top-1/2 left-0 -translate-y-1/2 h-24 md:h-28 w-auto object-contain pointer-events-none" />
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
@@ -287,6 +290,17 @@ const Index = () => {
                     {isGenerating ? "Gerando..." : "Exportar PDF"}
                   </Button>
                   
+                  {user?.is_admin && (
+                    <Button
+                      onClick={() => navigate('/admin')}
+                      variant="secondary"
+                      className="h-9 px-4 rounded-md hidden sm:flex border border-primary/20 text-primary"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin
+                    </Button>
+                  )}
+                  
                   {/* Profile Dropdown or Link */}
                   <Link to="/profile">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer">
@@ -309,212 +323,110 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative border-b border-border bg-background overflow-hidden">
-        {/* Enhanced Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Gradient Orbs */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-primary/8 via-primary/4 to-transparent rounded-full blur-3xl" />
-          
-          {/* Subtle Grid Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)] opacity-10" />
-        </div>
+      {/* Hero Section Re-added as requested */}
+      <div className="border-b border-border/50">
+        <Hero />
+      </div>
 
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-24 relative">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-6">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                <span className="text-xs font-medium text-foreground">Plataforma Profissional</span>
-              </div>
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="max-w-7xl mx-auto px-6 py-12 lg:py-20 relative z-10 -mt-12"
+      >
+        {/* Background panel to give a minimal glass effect to the main app area */}
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-3xl border border-border/40 rounded-t-3xl shadow-2xl -z-10" />
 
-              {/* Title with Gradient Accent */}
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-                <span className="text-foreground">Crie contratos </span>
-                <span className="bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
-                  profissionais
-                </span>
-              </h1>
-
-              {/* Description */}
-              <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Preencha os dados, escolha um modelo e exporte em PDF. 
-                Simples, rápido e sem complicações.
-              </p>
-
-              {/* Features List with Icons */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                {[
-                  { text: "Modelos prontos", icon: "📄" },
-                  { text: "Exportação PDF", icon: "⬇️" },
-                  { text: "Assinatura digital", icon: "✍️" },
-                  { text: "100% seguro", icon: "🔒" }
-                ].map((feature, idx) => (
-                  <div key={idx} className="flex items-center gap-2 group">
-                    <div className="w-6 h-6 rounded-md bg-primary/5 flex items-center justify-center text-xs group-hover:bg-primary/10 transition-colors">
-                      {feature.icon}
-                    </div>
-                    <span className="text-sm text-muted-foreground">{feature.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Content - Enhanced Stats */}
-            <div className="hidden md:grid grid-cols-2 gap-4">
-              {/* Stat Card 1 */}
-              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all group">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="text-3xl font-semibold text-foreground group-hover:scale-105 transition-transform">99%</div>
-                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-green-500/50" />
-                  </div>
-                </div>
-                <div className="text-sm text-muted-foreground">Taxa de Sucesso</div>
-              </div>
-
-              {/* Stat Card 2 */}
-              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all group">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="text-3xl font-semibold text-foreground group-hover:scale-105 transition-transform">5min</div>
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-blue-500/50" />
-                  </div>
-                </div>
-                <div className="text-sm text-muted-foreground">Tempo Médio</div>
-              </div>
-
-              {/* Feature Card */}
-              <div className="p-6 rounded-lg border border-border bg-gradient-to-br from-card to-card/50 hover:border-foreground/20 hover:shadow-lg transition-all col-span-2 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Download className="w-6 h-6 text-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-foreground mb-0.5">Exportação Rápida</div>
-                    <div className="text-sm text-muted-foreground">PDF profissional em segundos</div>
-                  </div>
-                  <div className="w-2 h-2 rounded-full bg-primary/30" />
-                </div>
-              </div>
-            </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full relative px-2 md:px-6 pt-8 pb-12">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+              Workspace de Contratos
+            </h1>
+            <p className="text-muted-foreground mt-2 font-medium">Sua mesa de trabalho digital. Crie e exporte em segundos.</p>
           </div>
-        </div>
-
-        {/* Bottom Accent Line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      </section>
-
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Tab Controls */}
-          <TabsList className="flex items-center gap-1 p-1 bg-secondary rounded-lg w-fit mb-8 h-auto">
+          
+          <TabsList className="flex items-center p-1.5 bg-secondary/80 backdrop-blur-lg rounded-xl h-auto border border-border shadow-lg">
             <TabsTrigger 
               value="edit" 
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-minimal transition-all"
+              className="flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary transition-all"
             >
               <Pencil className="w-4 h-4" />
-              Editar
+              Editor Inteligente
             </TabsTrigger>
             <TabsTrigger 
               value="preview" 
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-minimal transition-all"
+              className="flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary transition-all"
             >
               <Eye className="w-4 h-4" />
-              Visualizar
+              Visualização Final
             </TabsTrigger>
           </TabsList>
-
+        </div>
           {/* Tab Content */}
-          <TabsContent value="edit" className="animate-in space-y-6 mt-0">
-            <ContractHistory
-              contracts={savedContracts}
-              onLoad={handleLoadContract}
-              onDelete={handleDeleteContract}
-              onClearAll={handleClearHistory}
-            />
-            <TemplateSelector 
-              onSelectTemplate={handleSelectTemplate} 
-              selectedTemplateId={selectedTemplateId} 
-            />
-            <ContractForm data={contractData} onChange={setContractData} />
+          <TabsContent value="edit" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Left Column: Sidebar / History & Templates */}
+              <div className="lg:col-span-4 space-y-6">
+                <ContractHistory
+                  contracts={savedContracts}
+                  onLoad={handleLoadContract}
+                  onDelete={handleDeleteContract}
+                  onClearAll={handleClearHistory}
+                />
+                
+                <TemplateSelector 
+                  onSelectTemplate={handleSelectTemplate} 
+                  selectedTemplateId={selectedTemplateId} 
+                />
+              </div>
+
+              {/* Right Column: Main Form */}
+              <div className="lg:col-span-8">
+                <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Formulário de Contrato</h2>
+                    <Button
+                      onClick={() => requireAuth(handleSaveContract)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                    >
+                      <Save className="w-3.5 h-3.5 mr-2" />
+                      Salvar Progresso
+                    </Button>
+                  </div>
+                  <div className="p-6">
+                    <ContractForm data={contractData} onChange={setContractData} />
+                  </div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="preview" className="animate-in mt-0">
-            <ContractPreview ref={previewRef} data={contractData} />
+          <TabsContent value="preview" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
+            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Pré-visualização do Documento</h2>
+                <Button
+                  onClick={() => requireAuth(generatePDF)}
+                  disabled={isGenerating}
+                  size="sm"
+                  className="h-8 btn-primary"
+                >
+                  <Download className="w-3.5 h-3.5 mr-2" />
+                  {isGenerating ? "Gerando..." : "Baixar PDF"}
+                </Button>
+              </div>
+              <div className="p-6 bg-slate-50/50">
+                <ContractPreview ref={previewRef} data={contractData} />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
-      </main>
+      </motion.main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-secondary/30 mt-16">
-        <div className="max-w-5xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Brand */}
-            <div className="flex flex-col items-start space-y-4">
-              <img src="/logo.png" alt="Logo" className="h-14 md:h-16 w-auto object-contain" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Crie contratos profissionais de forma rápida e simples. 
-                Personalize, assine e exporte em PDF.
-              </p>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-4">
-              <h4 className="font-medium text-foreground">Recursos</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Modelos pré-configurados
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Validação de CPF/CNPJ
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Assinatura digital
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Exportação em PDF
-                </li>
-              </ul>
-            </div>
-
-            {/* Info */}
-            <div className="space-y-4">
-              <h4 className="font-medium text-foreground">Informações</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Dados salvos localmente
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Histórico de contratos
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                  Tema claro e escuro
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom */}
-          <div className="mt-10 pt-6 border-t border-border">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-              <span>© {new Date().getFullYear()} Contratos. Todos os direitos reservados.</span>
-              <span className="text-xs">Feito com dedicação para simplificar sua rotina.</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

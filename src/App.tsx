@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminPanel from "./pages/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -25,13 +26,23 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Login />} />
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminPanel />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

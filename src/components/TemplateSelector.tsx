@@ -103,7 +103,7 @@ const TemplateSelector = ({
       </div>
       
       {/* Standard Templates */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {contractTemplates.map((t) => renderTemplateCard(t))}
       </div>
 
@@ -116,7 +116,7 @@ const TemplateSelector = ({
               {customTemplates.length}
             </span>
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 gap-3">
              {customTemplates.map((t) => renderTemplateCard(t, true))}
           </div>
         </div>
