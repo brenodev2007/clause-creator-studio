@@ -10,10 +10,9 @@ import {
 interface TokenDisplayProps {
   tokens: number;
   dailyLimit?: number;
-  onBuyTokens: () => void;
 }
 
-const TokenDisplay = ({ tokens, dailyLimit, onBuyTokens }: TokenDisplayProps) => {
+const TokenDisplay = ({ tokens, dailyLimit }: TokenDisplayProps) => {
   const isLow = tokens <= 3;
   const percentage = dailyLimit ? (tokens / dailyLimit) * 100 : 100;
   
@@ -55,14 +54,6 @@ const TokenDisplay = ({ tokens, dailyLimit, onBuyTokens }: TokenDisplayProps) =>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <Button
-        onClick={onBuyTokens}
-        variant="outline"
-        size="sm"
-        className="h-8 text-xs"
-      >
-        Planos
-      </Button>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, CreditCard, User as UserIcon, ArrowLeft } from "lucide-react";
-import PricingModal from "../components/PricingModal";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
 
@@ -93,14 +93,6 @@ const Profile = () => {
                   {typeof dailyLimit === 'number' ? dailyLimit : '∞'}
                 </span>
               </div>
-
-              <Button 
-                onClick={() => setShowPricingModal(true)} 
-                className="w-full mt-2" 
-                variant={plan === 'free' ? 'default' : 'outline'}
-              >
-                {plan === 'free' ? 'Fazer Upgrade' : 'Alterar Plano'}
-              </Button>
             </CardContent>
           </Card>
 
@@ -133,17 +125,6 @@ const Profile = () => {
           </Card>
         </div>
       </div>
-
-      <PricingModal
-        open={showPricingModal}
-        onClose={() => setShowPricingModal(false)}
-        onSelectPlan={(newPlan) => {
-          upgradePlan(newPlan);
-          setShowPricingModal(false);
-        }}
-        currentTokens={tokens}
-        currentPlan={plan}
-      />
     </div>
   );
 };

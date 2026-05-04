@@ -8,7 +8,7 @@ import ContractPreview from "@/components/ContractPreview";
 import ContractHistory from "@/components/ContractHistory";
 import TemplateSelector from "@/components/TemplateSelector";
 import TokenDisplay from "@/components/TokenDisplay";
-import PricingModal from "@/components/PricingModal";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ContractData } from "@/types/contract";
 import { ContractTemplate } from "@/data/contractTemplates";
@@ -254,13 +254,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <PricingModal
-        open={showPricingModal}
-        onClose={closePricingModal}
-        onSelectPlan={(plan) => requireAuth(() => handleUpgradePlan(plan))}
-        pendingAction={pendingAction}
-        currentTokens={tokens}
-      />
       {/* Header */}
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4">
@@ -276,7 +269,6 @@ const Index = () => {
                   <TokenDisplay 
                     tokens={tokens}
                     dailyLimit={dailyLimit}
-                    onBuyTokens={() => setShowPricingModal(true)} 
                   />
                    <Button
                     onClick={() => requireAuth(handleSaveContract)}
