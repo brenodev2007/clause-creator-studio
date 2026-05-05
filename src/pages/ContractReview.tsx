@@ -118,9 +118,13 @@ export default function ContractReview() {
 
     try {
       const element = previewRef.current;
+      
+      // Scroll to top to ensure capture starts from the beginning
+      window.scrollTo(0, 0);
 
       // Force a fixed width so the capture is consistent regardless of screen size
       const originalWidth = element.style.width;
+      const originalHeight = element.style.height;
       element.style.width = '794px'; // A4 at 96dpi = 794px
 
       const canvas = await html2canvas(element, {
@@ -130,8 +134,9 @@ export default function ContractReview() {
         backgroundColor: "#ffffff",
       });
 
-      // Restore original width
+      // Restore original styles
       element.style.width = originalWidth;
+      element.style.height = originalHeight;
 
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -148,7 +153,7 @@ export default function ContractReview() {
 
       // If content fits in one page, simple case
       if (imgHeightMm <= pdfHeight) {
-        pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, imgWidthMm, imgHeightMm);
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, imgWidthMm, imgHeightMm);
       } else {
         // Multi-page: slice the canvas into page-sized chunks
         const pageHeightPx = (pdfHeight / pdfWidth) * canvas.width;
@@ -177,8 +182,8 @@ export default function ContractReview() {
 
             const sliceHeightMm = (sliceHeight * pdfWidth) / canvas.width;
             pdf.addImage(
-              pageCanvas.toDataURL("image/png"),
-              "PNG",
+              pageCanvas.toDataURL("image/jpeg", 0.95),
+              "JPEG",
               0, 0,
               imgWidthMm,
               sliceHeightMm
@@ -232,51 +237,75 @@ export default function ContractReview() {
             </div>
             
             {/* Real Contract Preview (A4-like) */}
-            <div className="bg-secondary/50 p-8 rounded-xl border border-border overflow-x-auto">
+            <div className="bg-secondary/30 p-4 md:p-12 rounded-2xl border border-border shadow-inner flex justify-center overflow-hidden">
               <div 
-                ref={previewRef}
-                className="mx-auto shadow-lg rounded-sm"
+                className="relative bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-sm origin-top transition-transform duration-300"
                 style={{ 
-                  width: '794px',
-                  minHeight: '1123px',
-                  padding: '60px 70px',
-                  fontFamily: "'Times New Roman', 'Georgia', serif",
-                  fontSize: '14px',
-                  lineHeight: '1.8',
-                  backgroundColor: '#ffffff',
-                  color: '#1a1a1a',
+                  transform: typeof window !== 'undefined' && window.innerWidth < 1000 ? `scale(${(window.innerWidth - 100) / 794})` : 'scale(1)',
                 }}
               >
-                {contract.content ? (
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: contract.content }} 
-                    style={{ 
-                      color: '#1a1a1a',
-                      wordBreak: 'break-word',
-                    }}
-                  />
-                ) : (
-                  <p style={{ color: '#999', fontStyle: 'italic' }}>Nenhum conteúdo disponível para visualização.</p>
-                )}
+                <div 
+                  ref={previewRef}
+                  className="bg-white text-black"
+                  style={{ 
+                    width: '794px',
+                    minHeight: '1123px',
+                    padding: '80px 90px',
+                    fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    backgroundColor: '#ffffff',
+                    color: '#1a1a1a',
+                  }}
+                >
+                  {contract.content ? (
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: `
+                        <style>
+                          .pdf-content { font-family: 'Times New Roman', serif; }
+                          .pdf-content h1 { font-size: 26px; font-weight: bold; margin-bottom: 24px; text-align: center; color: #000; text-transform: uppercase; letter-spacing: 1px; }
+                          .pdf-content h2 { font-size: 18px; font-weight: bold; margin-top: 32px; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+                          .pdf-content p { margin-bottom: 16px; text-align: justify; line-height: 1.8; }
+                          .pdf-content ul, .pdf-content ol { margin-left: 24px; margin-bottom: 16px; }
+                          .pdf-content li { margin-bottom: 8px; text-align: justify; }
+                          .pdf-content strong { font-weight: bold; color: #000; }
+                          .pdf-content .variable { background-color: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-weight: 500; font-family: monospace; color: #475569; }
+                          .pdf-content img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+                        </style>
+                        <div class="pdf-content">${contract.content}</div>
+                      ` }} 
+                      style={{ 
+                        color: '#1a1a1a',
+                        wordBreak: 'break-word',
+                      }}
+                    />
+                  ) : (
+                    <p style={{ color: '#999', fontStyle: 'italic' }}>Nenhum conteúdo disponível para visualização.</p>
+                  )}
 
-                {/* Signature area */}
-                {signers.length > 0 && (
-                  <div style={{ marginTop: '80px', paddingTop: '30px', borderTop: '1px solid #e5e5e5' }}>
-                    <p style={{ fontSize: '12px', color: '#666', marginBottom: '40px', textAlign: 'center' }}>
-                      Local e data: ______________________________, _____ de ________________ de {new Date().getFullYear()}.
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '40px' }}>
-                      {signers.map((signer) => (
-                        <div key={signer.id} style={{ textAlign: 'center', minWidth: '200px' }}>
-                          <div style={{ borderTop: '1px solid #333', paddingTop: '8px', marginTop: '60px' }}>
-                            <p style={{ fontWeight: 'bold', fontSize: '13px' }}>{signer.name}</p>
-                            <p style={{ fontSize: '11px', color: '#666' }}>{signer.email}</p>
+                  {/* Signature area */}
+                  {signers.length > 0 && (
+                    <div style={{ marginTop: '100px', paddingTop: '40px', borderTop: '2px solid #f1f5f9' }}>
+                      <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '60px', textAlign: 'center', fontStyle: 'italic' }}>
+                        Documento assinado digitalmente em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px 40px' }}>
+                        {signers.map((signer) => (
+                          <div key={signer.id} style={{ textAlign: 'center' }}>
+                            <div style={{ borderTop: '1px solid #000', paddingTop: '12px', marginTop: '40px' }}>
+                              <p style={{ fontWeight: 'bold', fontSize: '14px', color: '#000' }}>{signer.name}</p>
+                              <p style={{ fontSize: '12px', color: '#64748b' }}>{signer.email}</p>
+                              <div style={{ marginTop: '8px', fontSize: '10px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
+                                Autenticado via ZELO Digital
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>

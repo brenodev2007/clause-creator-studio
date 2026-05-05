@@ -8,9 +8,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import { ImagePlus } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { CheckCircle2, Cloud, Loader2 } from "lucide-react";
 
 const initialContent = `
 <h2>CLÁUSULA 1: OBJETO DO CONTRATO.</h2>
@@ -28,18 +31,13 @@ const initialContent = `
 export default function ContractEditor() {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const [customClauses, setCustomClauses] = useState<any[]>([]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('zelo_saved_clauses');
-    if (saved) {
-      setCustomClauses(JSON.parse(saved));
-    }
-  }, []);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState("");
+  const [customClauses, setCustomClauses] = useState<{category: string, title: string, content: string}[]>([]);
+  const { id } = useParams();
 
   const clauseLibrary = useMemo(() => {
-    const base = {
+    const base: Record<string, {title: string, content: string}[]> = {
       "Foro e Jurisdição": [
         { title: "Foro Padrão (São Paulo)", content: "<p><strong>[Foro de Eleição]</strong></p><p>Fica eleito o foro da comarca da Capital do Estado de São Paulo para dirimir quaisquer dúvidas originárias deste contrato, com renúncia a qualquer outro, por mais privilegiado que seja.</p>" },
         { title: "Foro - Cláusula Arbitral", content: "<p><strong>[Cláusula Arbitral]</strong></p><p>Qualquer litígio ou controvérsia decorrente deste contrato será resolvido por arbitragem, administrada pela Câmara de Mediação e Arbitragem, de acordo com suas regras.</p>" }
@@ -79,12 +77,14 @@ export default function ContractEditor() {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
       Placeholder.configure({
         placeholder: 'Comece a digitar o seu contrato...',
+      }),
+      Image.configure({
+        allowBase64: true,
       }),
     ],
     content: initialContent,
@@ -95,17 +95,110 @@ export default function ContractEditor() {
     },
   });
 
-  if (!editor) {
-    return null;
-  }
+  const addImage = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event: any) => {
+          editor?.chain().focus().setImage({ src: event.target.result }).run();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
 
   const insertClause = (clauseText: string) => {
-    editor.chain().focus().insertContent(`
+    editor?.chain().focus().insertContent(`
       <div style="background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin: 16px 0;">
         ${clauseText}
       </div>
     `).run();
   };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('zelo_saved_clauses');
+    if (saved) {
+      setCustomClauses(JSON.parse(saved));
+    }
+  }, []);
+
+  // Load contract content
+  useEffect(() => {
+    if (editor && id && id !== 'novo') {
+      const saved = localStorage.getItem('zelo_saved_contracts');
+      if (saved) {
+        const contracts = JSON.parse(saved);
+        const contract = contracts.find((c: any) => c.id === id);
+        if (contract && contract.content) {
+          editor.commands.setContent(contract.content);
+        }
+      }
+    }
+  }, [id, editor]);
+
+  // Auto-save logic
+  useEffect(() => {
+    if (!editor || !id) return;
+
+    const timer = setTimeout(() => {
+      const htmlContent = editor.getHTML();
+      
+      // Don't auto-save if it's the initial dummy content or empty
+      if (id === 'novo' && (htmlContent.length < 50)) return;
+
+      const saved = localStorage.getItem('zelo_saved_contracts');
+      const contracts = saved ? JSON.parse(saved) : [];
+      
+      let currentId = id;
+      let shouldNavigate = false;
+
+      if (id === 'novo') {
+        setIsSaving(true);
+        currentId = crypto.randomUUID();
+        shouldNavigate = true;
+        const newContract = {
+          id: currentId,
+          title: `Contrato - ${new Date().toLocaleDateString('pt-BR')}`,
+          content: htmlContent,
+          status: 'Rascunho',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        contracts.unshift(newContract);
+        localStorage.setItem('zelo_saved_contracts', JSON.stringify(contracts));
+      } else {
+        const idx = contracts.findIndex((c: any) => c.id === id);
+        if (idx >= 0 && contracts[idx].content !== htmlContent) {
+          setIsSaving(true);
+          contracts[idx] = {
+            ...contracts[idx],
+            content: htmlContent,
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem('zelo_saved_contracts', JSON.stringify(contracts));
+        } else {
+          return; // No changes to save
+        }
+      }
+      
+      setTimeout(() => {
+        setIsSaving(false);
+        setLastSaved(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+        if (shouldNavigate) {
+          navigate(`/app/editor/${currentId}`, { replace: true });
+        }
+      }, 800);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [editor?.getHTML(), id]);
+
+
 
   const handleSaveDraft = () => {
     if (!editor) return;
@@ -277,6 +370,19 @@ export default function ContractEditor() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">Novo Contrato de Prestação de Serviços</h1>
             <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mr-2">
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Salvando...
+                  </>
+                ) : lastSaved ? (
+                  <>
+                    <Cloud className="w-3 h-3 text-green-500" />
+                    Salvo às {lastSaved}
+                  </>
+                ) : null}
+              </div>
               <Button onClick={handleSaveTemplate} variant="outline" className="bg-card text-foreground hover:bg-accent font-medium px-4">
                 Salvar Modelo
               </Button>
@@ -342,6 +448,16 @@ export default function ContractEditor() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
             </button>
             
+            <div className="w-px h-6 bg-secondary mx-2" />
+            
+            <button
+              onClick={addImage}
+              className="flex items-center gap-1 px-3 py-1.5 rounded hover:bg-accent text-sm font-medium text-foreground"
+              title="Inserir Imagem / Logo"
+            >
+              <ImagePlus className="w-4 h-4" />
+            </button>
+
             <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
