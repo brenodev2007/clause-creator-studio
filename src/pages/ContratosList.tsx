@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MoreHorizontal, Pencil, Trash2, Send, FileText, Plus, Eye, Users } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, Send, FileText, Plus, Eye, Users, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -264,15 +264,9 @@ export default function ContratosList() {
                             <Eye className="w-4 h-4 mr-2" />
                             Revisar / Baixar PDF
                           </DropdownMenuItem>
-                          {contract.status === "Rascunho" && (
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleChangeStatus(contract.id, "Pendente")}>
-                              <Send className="w-4 h-4 mr-2" />
-                              Enviar para Assinatura
-                            </DropdownMenuItem>
-                          )}
-                          {contract.status === "Pendente" && (
-                            <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => handleChangeStatus(contract.id, "Concluído")}>
-                              <Send className="w-4 h-4 mr-2" />
+                          {contract.status !== "Concluído" && (
+                            <DropdownMenuItem className="cursor-pointer text-green-600 font-semibold" onClick={() => handleChangeStatus(contract.id, "Concluído")}>
+                              <CheckCircle className="w-4 h-4 mr-2" />
                               Marcar como Concluído
                             </DropdownMenuItem>
                           )}
