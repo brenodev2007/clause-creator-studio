@@ -229,9 +229,9 @@ export default function ModelosGallery() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-8">
+        <div className="relative w-full md:max-w-sm shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input 
             placeholder="Buscar por nome ou palavra-chave..." 
             className="pl-9 bg-card border-border h-11"
@@ -239,7 +239,7 @@ export default function ModelosGallery() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 w-full no-scrollbar">
+        <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <Button
               key={cat}

@@ -47,20 +47,14 @@ const App = () => (
                 <Route path="clausulas" element={<ClausulasLibrary />} />
                 <Route path="editor/:id" element={<ContractEditor />} />
                 <Route path="revisao/:id" element={<ContractReview />} />
+                <Route path="configuracoes" element={<Profile />} />
+                <Route path="admin" element={<AdminPanel />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } />
+
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

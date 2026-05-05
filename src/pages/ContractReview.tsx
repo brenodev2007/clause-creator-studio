@@ -1,131 +1,404 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Download, Link as LinkIcon, Edit3 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Download, Link as LinkIcon, Edit3, Trash2, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
+interface Signer {
+  id: string;
+  name: string;
+  email: string;
+  signedAt?: string;
+}
+
+interface ContractData {
+  id: string;
+  title?: string;
+  name?: string;
+  content?: string;
+  status?: string;
+  updatedAt?: string;
+  signers?: Signer[];
+}
 
 export default function ContractReview() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const previewRef = useRef<HTMLDivElement>(null);
+  
+  const [contract, setContract] = useState<ContractData | null>(null);
   const [email, setEmail] = useState("");
+  const [signers, setSigners] = useState<Signer[]>([]);
+  const [useOrder, setUseOrder] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('zelo_saved_contracts');
+    if (saved && id) {
+      const contracts: ContractData[] = JSON.parse(saved);
+      const found = contracts.find(c => c.id === id);
+      if (found) {
+        setContract(found);
+        setSigners(found.signers || []);
+      }
+    }
+  }, [id]);
+
+  const updateContractInStorage = (updates: Partial<ContractData>) => {
+    const saved = localStorage.getItem('zelo_saved_contracts');
+    if (!saved || !id) return;
+    const contracts: ContractData[] = JSON.parse(saved);
+    const idx = contracts.findIndex(c => c.id === id);
+    if (idx >= 0) {
+      contracts[idx] = { ...contracts[idx], ...updates, updatedAt: new Date().toISOString() };
+      localStorage.setItem('zelo_saved_contracts', JSON.stringify(contracts));
+      setContract(contracts[idx]);
+    }
+  };
+
+  const handleAddSigner = () => {
+    if (!email || !email.includes('@')) {
+      toast.error("Por favor, insira um e-mail válido.");
+      return;
+    }
+
+    if (signers.some(s => s.email === email)) {
+      toast.error("Este signatário já foi adicionado.");
+      return;
+    }
+
+    const namePart = email.split('@')[0];
+    const mockName = namePart.split(/[.\-_]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+
+    const newSigner: Signer = {
+      id: crypto.randomUUID(),
+      name: mockName,
+      email: email.trim()
+    };
+
+    const updated = [...signers, newSigner];
+    setSigners(updated);
+    setEmail("");
+  };
+
+  const handleRemoveSigner = (signerId: string) => {
+    const updated = signers.filter(s => s.id !== signerId);
+    setSigners(updated);
+  };
+
+  const handleSendToSignature = () => {
+    if (signers.length === 0) {
+      toast.error("Adicione pelo menos um signatário para enviar.");
+      return;
+    }
+    
+    // Save signers and change status to Pendente
+    updateContractInStorage({ 
+      status: 'Pendente', 
+      signers: signers 
+    });
+    
+    toast.success(`Contrato enviado para ${signers.length} signatário(s)!`);
+    setTimeout(() => {
+      navigate('/app/contratos');
+    }, 1200);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!previewRef.current) {
+      toast.error("Não foi possível gerar o PDF. Tente novamente.");
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+
+    try {
+      const element = previewRef.current;
+
+      // Force a fixed width so the capture is consistent regardless of screen size
+      const originalWidth = element.style.width;
+      element.style.width = '794px'; // A4 at 96dpi = 794px
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Restore original width
+      element.style.width = originalWidth;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+      // Scale image to fit A4 width
+      const imgWidthMm = pdfWidth;
+      const imgHeightMm = (canvas.height * pdfWidth) / canvas.width;
+
+      // If content fits in one page, simple case
+      if (imgHeightMm <= pdfHeight) {
+        pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, imgWidthMm, imgHeightMm);
+      } else {
+        // Multi-page: slice the canvas into page-sized chunks
+        const pageHeightPx = (pdfHeight / pdfWidth) * canvas.width;
+        let position = 0;
+        let pageNum = 0;
+
+        while (position < canvas.height) {
+          const sliceHeight = Math.min(pageHeightPx, canvas.height - position);
+
+          // Create a canvas slice for this page
+          const pageCanvas = document.createElement("canvas");
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sliceHeight;
+          const ctx = pageCanvas.getContext("2d");
+          
+          if (ctx) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            ctx.drawImage(
+              canvas,
+              0, position, canvas.width, sliceHeight,
+              0, 0, canvas.width, sliceHeight
+            );
+
+            if (pageNum > 0) pdf.addPage();
+
+            const sliceHeightMm = (sliceHeight * pdfWidth) / canvas.width;
+            pdf.addImage(
+              pageCanvas.toDataURL("image/png"),
+              "PNG",
+              0, 0,
+              imgWidthMm,
+              sliceHeightMm
+            );
+          }
+
+          position += sliceHeight;
+          pageNum++;
+        }
+      }
+
+      const fileName = `${(contract?.title || 'contrato').replace(/\s+/g, '_')}.pdf`;
+      pdf.save(fileName);
+
+      toast.success(`PDF "${fileName}" baixado com sucesso!`);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar o PDF. Tente novamente.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  if (!contract) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center text-muted-foreground">
+          <p className="text-lg font-medium">Contrato não encontrado</p>
+          <p className="text-sm mt-1">Este contrato pode ter sido excluído.</p>
+          <Button variant="outline" className="mt-4" onClick={() => navigate('/app/contratos')}>
+            Voltar para Contratos
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-muted">
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto w-full px-6 py-8 flex flex-col lg:flex-row gap-8">
           {/* Left side: PDF Preview */}
-      <div className="flex-1">
-        <div className="mb-6">
-          <Link to="/app/editor/123" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors w-fit mb-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Voltar para Edição
-          </Link>
-          <h1 className="text-2xl font-bold text-foreground">Zelo - Revisão e Assinatura Digital</h1>
-        </div>
-        
-        {/* Mock A4 Pages */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-secondary p-8 rounded-xl border border-border h-[600px] overflow-y-auto">
-          {/* Page 1 */}
-          <div className="bg-card shadow-md w-full aspect-[1/1.414] p-8 text-[8px] text-foreground/90 leading-relaxed font-serif relative">
-             <h2 className="text-center font-bold text-[12px] mb-4">Contrato de Prestação de Serviços</h2>
-             <p className="mb-2">A. CONTRATO _________________ é officio promxpate tameto, inilopto de avavie, travederante brostação divenilpr, date feilize maona ____________ para collaburetir da _____________ core dir yogin ___ de ______ du firlo dsovdei de flhdhestepão de Serviços noe ane seupme pante iploriuando e recedentamio o Contrato de Prestação de Serviços, onessno adirar somintabam ein anoralra de presagdz de darmoalbe, anosdimein, sonto vetomunis avihonlizado, ips um sen- um prenupis de aioremene de sou ocaps da conesididade coninry ae eirae toramna, momentos stetama-arouun imporotaetr que selin:</p>
-             <ul className="list-disc pl-4 mb-2 space-y-1">
-               <li>Cariommiro a Prestação de Serviços e nis (O) vemshalo no PDF, peto crente eonitor planta stas cokoeros, sevenita;</li>
-               <li>Reahara de ecer avillação no, eonsamassevitação mutas nerem air pecana proganda otliode de servicos;</li>
-             </ul>
-             <p className="font-bold mt-4 mb-1">Cláusula 1 - A sovtação de Prestação de Serviços</p>
-             <p className="mb-2">Contrato de Prestopto de Serviços soronâ-s guntiom forinminaras, ss onaste a poontilidade de unisdo termo e trada eonnemia nociticeis a restinilo naribei pvemitelcata naneo selvo vaianiele to oi contrstait de carvestis...</p>
-          </div>
-          {/* Page 2 */}
-          <div className="bg-card shadow-md w-full aspect-[1/1.414] p-8 text-[8px] text-foreground/90 leading-relaxed font-serif relative">
-             <ul className="list-disc pl-4 mb-2 space-y-1">
-               <li>Rsoricinato uma ononsonvasção de serviço, aitviss conliferação de denvosenitondo constrabi de suas abentsisas agreidnes;</li>
-               <li>Conninde atzzar wiclada de contrator, do doio, de nv asentar-silto. Serviços sa consuridades;</li>
-             </ul>
-             <p className="font-bold mt-4 mb-1">Cláusulas 6 - Ascamado ancuma rocss Contrato de Prestação de Serviços</p>
-             <p className="mb-4">pelo contrato do arnviato de roperiotitsoo de emenotilsc ix mixiara doro nountante jsontiomamto, artendo asaceste. oef carelse ação de sanda: armpso a contado de contra e "en esta enaitanmo skarmeto de conrsietos.</p>
-             
-             <div className="mt-12 text-center text-[10px]">
-               <p>Contrato ____ em _____ de _______ 2023.</p>
-               <div className="flex justify-between px-8 mt-16">
-                 <div className="border-t border-border pt-1 w-24">Signatário</div>
-                 <div className="border-t border-border pt-1 w-24">Assinante da Prestação</div>
-               </div>
-             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right side: Actions panel */}
-      <div className="w-full lg:w-80 shrink-0 space-y-6 pt-14">
-        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-14 text-lg rounded-xl shadow-lg shadow-primary/20">
-          <Download className="w-5 h-5 mr-2" />
-          Baixar em PDF
-        </Button>
-
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-foreground mb-4">Assinatura Digital</h3>
-          
-          <div className="space-y-4">
-            <Input 
-              placeholder="Adicionar e-mail do signatário" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 text-base border-border/80"
-            />
-            <Button variant="outline" className="w-full border-border/80 text-foreground hover:bg-accent h-12">
-              Adicionar Signatário
-            </Button>
+          <div className="flex-1 min-w-0">
+            <div className="mb-6">
+              <Link to={`/app/editor/${id || 'novo'}`} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors w-fit mb-2">
+                <ArrowLeft className="w-4 h-4" />
+                Voltar para Edição
+              </Link>
+              <h1 className="text-2xl font-bold text-foreground">{contract.title || "Revisão do Contrato"}</h1>
+              <p className="text-sm text-muted-foreground mt-1">Revise o documento, adicione signatários ou baixe em PDF.</p>
+            </div>
             
-            <div className="space-y-3 mt-4">
-              {/* Signer 1 */}
-              <div className="bg-muted border border-border rounded-lg p-3">
-                <p className="font-bold text-foreground text-sm">João Silva <span className="font-normal text-muted-foreground">- joao@email.com</span></p>
-                <p className="text-muted-foreground text-sm">(Assinante 1, Aguardando)</p>
-              </div>
-              {/* Signer 2 */}
-              <div className="bg-muted border border-border rounded-lg p-3">
-                <p className="font-bold text-foreground text-sm">Maria Costa <span className="font-normal text-muted-foreground">- maria@email.com</span></p>
-                <p className="text-muted-foreground text-sm">(Assinante 2, Aguardando)</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 pt-2 pb-2">
-              <Checkbox id="order" className="border-primary data-[state=checked]:bg-primary" defaultChecked />
-              <label
-                htmlFor="order"
-                className="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
+            {/* Real Contract Preview (A4-like) */}
+            <div className="bg-secondary/50 p-8 rounded-xl border border-border overflow-x-auto">
+              <div 
+                ref={previewRef}
+                className="mx-auto shadow-lg rounded-sm"
+                style={{ 
+                  width: '794px',
+                  minHeight: '1123px',
+                  padding: '60px 70px',
+                  fontFamily: "'Times New Roman', 'Georgia', serif",
+                  fontSize: '14px',
+                  lineHeight: '1.8',
+                  backgroundColor: '#ffffff',
+                  color: '#1a1a1a',
+                }}
               >
-                Definir ordem de assinatura
-              </label>
-            </div>
+                {contract.content ? (
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: contract.content }} 
+                    style={{ 
+                      color: '#1a1a1a',
+                      wordBreak: 'break-word',
+                    }}
+                  />
+                ) : (
+                  <p style={{ color: '#999', fontStyle: 'italic' }}>Nenhum conteúdo disponível para visualização.</p>
+                )}
 
-            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-12 rounded-lg">
-              Enviar para Assinatura
+                {/* Signature area */}
+                {signers.length > 0 && (
+                  <div style={{ marginTop: '80px', paddingTop: '30px', borderTop: '1px solid #e5e5e5' }}>
+                    <p style={{ fontSize: '12px', color: '#666', marginBottom: '40px', textAlign: 'center' }}>
+                      Local e data: ______________________________, _____ de ________________ de {new Date().getFullYear()}.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '40px' }}>
+                      {signers.map((signer) => (
+                        <div key={signer.id} style={{ textAlign: 'center', minWidth: '200px' }}>
+                          <div style={{ borderTop: '1px solid #333', paddingTop: '8px', marginTop: '60px' }}>
+                            <p style={{ fontWeight: 'bold', fontSize: '13px' }}>{signer.name}</p>
+                            <p style={{ fontSize: '11px', color: '#666' }}>{signer.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right side: Actions panel */}
+          <div className="w-full lg:w-80 shrink-0 space-y-6 pt-14">
+            <Button 
+              onClick={handleDownloadPDF} 
+              disabled={isGeneratingPDF}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-14 text-lg rounded-xl shadow-lg shadow-primary/20"
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Gerando PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 mr-2" />
+                  Baixar em PDF
+                </>
+              )}
             </Button>
-          </div>
-        </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
-          <div className="flex gap-4 cursor-pointer group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-              <LinkIcon className="w-5 h-5 text-primary" />
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h3 className="text-xl font-bold text-foreground mb-4">Assinatura Digital</h3>
+              
+              <div className="space-y-4">
+                <Input 
+                  placeholder="Adicionar e-mail do signatário" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddSigner()}
+                  className="h-12 text-base border-border/80"
+                />
+                <Button 
+                  onClick={handleAddSigner}
+                  variant="outline" 
+                  className="w-full border-border/80 text-foreground hover:bg-accent h-12"
+                >
+                  Adicionar Signatário
+                </Button>
+                
+                {signers.length > 0 && (
+                  <div className="space-y-3 mt-4 max-h-48 overflow-y-auto pr-1">
+                    {signers.map((signer, index) => (
+                      <div key={signer.id} className="bg-muted border border-border rounded-lg p-3 relative group">
+                        <p className="font-bold text-foreground text-sm truncate pr-6">{signer.name}</p>
+                        <p className="font-normal text-muted-foreground text-xs truncate">{signer.email}</p>
+                        <p className="text-xs mt-1 flex items-center gap-1">
+                          {signer.signedAt ? (
+                            <span className="text-green-500 flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" /> Assinado
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Assinante {index + 1} • Aguardando
+                            </span>
+                          )}
+                        </p>
+                        <button 
+                          onClick={() => handleRemoveSigner(signer.id)}
+                          className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remover signatário"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2 pt-2 pb-2">
+                  <Checkbox 
+                    id="order" 
+                    checked={useOrder}
+                    onCheckedChange={(checked) => setUseOrder(checked as boolean)}
+                    className="border-primary data-[state=checked]:bg-primary" 
+                  />
+                  <label
+                    htmlFor="order"
+                    className="text-sm font-semibold leading-none cursor-pointer text-foreground"
+                  >
+                    Definir ordem de assinatura
+                  </label>
+                </div>
+
+                <Button 
+                  onClick={handleSendToSignature}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-12 rounded-lg"
+                  disabled={signers.length === 0}
+                >
+                  Enviar para Assinatura
+                </Button>
+              </div>
             </div>
-            <div>
-              <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">Compartilhar por Link</h4>
-              <p className="text-sm text-muted-foreground mt-1">Compartilhar por Link de review aos compartihar por link.</p>
+
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
+              <div className="flex gap-4 cursor-pointer group" onClick={() => {
+                const shareUrl = `${window.location.origin}/app/revisao/${id}`;
+                navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copiado para a área de transferência!");
+              }}>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <LinkIcon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">Compartilhar por Link</h4>
+                  <p className="text-sm text-muted-foreground mt-1">Gere um link para revisão externa do documento.</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4 cursor-pointer group" onClick={() => navigate(`/app/editor/${id}`)}>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                  <Edit3 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">Voltar ao Editor</h4>
+                  <p className="text-sm text-muted-foreground mt-1">Faça alterações no conteúdo do documento.</p>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex gap-4 cursor-pointer group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-              <Edit3 className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">Assinatura Digital</h4>
-              <p className="text-sm text-muted-foreground mt-1">Ponar uma assinatura digital assinatura digital.</p>
-            </div>
-          </div>
-        </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Folder, ChevronDown, ChevronRight, FileText, User } from "lucide-react";
+import { Search, Folder, ChevronDown, ChevronRight, FileText, User, PanelLeftClose, PanelLeftOpen, LibraryBig } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -26,6 +27,7 @@ const initialContent = `
 
 export default function ContractEditor() {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [customClauses, setCustomClauses] = useState<any[]>([]);
 
@@ -108,12 +110,14 @@ export default function ContractEditor() {
   const handleSaveDraft = () => {
     if (!editor) return;
     const htmlContent = editor.getHTML();
+    const now = new Date().toISOString();
     const newDraft = {
       id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-      name: `Rascunho - ${new Date().toLocaleDateString()}`,
+      title: `Rascunho - ${new Date().toLocaleDateString('pt-BR')}`,
       content: htmlContent,
-      status: 'Rascunho'
+      status: 'Rascunho',
+      createdAt: now,
+      updatedAt: now,
     };
     
     const saved = localStorage.getItem('zelo_saved_contracts');
@@ -141,49 +145,124 @@ export default function ContractEditor() {
     toast.success("Modelo salvo com sucesso na sua galeria!");
   };
 
+  const handleAdvanceToReview = () => {
+    if (!editor) return;
+    const htmlContent = editor.getHTML();
+    const now = new Date().toISOString();
+    
+    const saved = localStorage.getItem('zelo_saved_contracts');
+    const existingContracts: any[] = saved ? JSON.parse(saved) : [];
+    
+    // Check if we're editing an existing contract (from URL params)
+    const urlId = window.location.pathname.split('/editor/')[1];
+    const existingIndex = existingContracts.findIndex((c: any) => c.id === urlId);
+    
+    let contractId: string;
+    
+    if (existingIndex >= 0) {
+      // Update existing
+      existingContracts[existingIndex] = {
+        ...existingContracts[existingIndex],
+        content: htmlContent,
+        updatedAt: now,
+      };
+      contractId = existingContracts[existingIndex].id;
+    } else {
+      // Create new
+      contractId = crypto.randomUUID();
+      existingContracts.unshift({
+        id: contractId,
+        title: `Contrato - ${new Date().toLocaleDateString('pt-BR')}`,
+        content: htmlContent,
+        status: 'Rascunho',
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+    
+    localStorage.setItem('zelo_saved_contracts', JSON.stringify(existingContracts));
+    navigate(`/app/revisao/${contractId}`);
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-muted">
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Clause Library */}
-      <aside className="w-80 bg-card border-r border-border flex flex-col h-full shrink-0">
-        <div className="p-6 bg-muted text-foreground rounded-tr-3xl rounded-br-3xl mr-4 my-4">
-          <h2 className="text-lg font-bold mb-4">Biblioteca de Cláusulas</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/80" />
-            <Input 
-              placeholder="Buscar" 
-              className="pl-9 bg-card text-foreground border-none h-10"
-            />
+      <motion.aside 
+        initial={false}
+        animate={{ width: isSidebarOpen ? 320 : 80 }} // 320 = w-80, 80 = w-20
+        className="bg-card border-r border-border flex flex-col h-full shrink-0 relative overflow-hidden group"
+      >
+        <div className={`p-6 bg-muted text-foreground rounded-tr-3xl rounded-br-3xl mr-4 my-4 transition-all duration-300 flex flex-col ${isSidebarOpen ? '' : 'items-center px-2 mr-2'}`}>
+          <div className="flex items-center gap-2 mb-4 whitespace-nowrap min-h-[28px]">
+            {!isSidebarOpen ? (
+               <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors mt-2" title="Abrir Biblioteca">
+                  <LibraryBig className="w-5 h-5" />
+               </button>
+            ) : (
+               <h2 className="text-lg font-bold">Biblioteca de Cláusulas</h2>
+            )}
           </div>
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="relative overflow-hidden">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/80" />
+                <Input 
+                  placeholder="Buscar" 
+                  className="pl-9 bg-card text-foreground border-none h-10"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
-          <Accordion type="single" collapsible className="w-full">
-            {Object.entries(clauseLibrary).map(([category, clauses]) => (
-              <AccordionItem key={category} value={category} className="border-none">
-                <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-accent font-semibold text-foreground">
-                  <div className="flex items-center gap-2">
-                    <Folder className="w-4 h-4" />
-                    {category}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-2 pt-2 pb-4">
-                  {clauses.map((clause) => (
-                    <button 
-                      key={clause.title}
-                      onClick={() => insertClause(clause.content)}
-                      className="text-left px-4 py-2 text-sm text-muted-foreground bg-secondary hover:bg-primary/10 hover:text-primary rounded-md transition-colors flex items-center gap-2 group"
-                    >
-                      <FileText className="w-3 h-3 shrink-0 group-hover:text-primary transition-colors" />
-                      <span className="truncate">{clause.title}</span>
-                    </button>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-w-[250px]">
+                <Accordion type="single" collapsible className="w-full">
+                  {Object.entries(clauseLibrary).map(([category, clauses]) => (
+                    <AccordionItem key={category} value={category} className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-accent font-semibold text-foreground">
+                        <div className="flex items-center gap-2">
+                          <Folder className="w-4 h-4 shrink-0" />
+                          <span className="truncate">{category}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="flex flex-col gap-2 pt-2 pb-4">
+                        {clauses.map((clause) => (
+                          <button 
+                            key={clause.title}
+                            onClick={() => insertClause(clause.content)}
+                            className="text-left px-4 py-2 text-sm text-muted-foreground bg-secondary hover:bg-primary/10 hover:text-primary rounded-md transition-colors flex items-center gap-2 group"
+                          >
+                            <FileText className="w-3 h-3 shrink-0 group-hover:text-primary transition-colors" />
+                            <span className="truncate">{clause.title}</span>
+                          </button>
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                </Accordion>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </aside>
+
+        {/* Bottom Collapse Toggle */}
+        <div className="p-4 border-t border-border mt-auto relative z-10 flex justify-center">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className={`flex items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300 w-full ${isSidebarOpen ? 'gap-3' : ''}`}
+            title={isSidebarOpen ? "Recolher biblioteca" : "Expandir biblioteca"}
+          >
+            <div className="transition-transform duration-300">
+              {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+            </div>
+            {isSidebarOpen && <span className="text-sm font-medium">Recolher</span>}
+          </button>
+        </div>
+      </motion.aside>
 
       {/* Main Editor Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-muted p-6">
@@ -204,7 +283,7 @@ export default function ContractEditor() {
               <Button onClick={handleSaveDraft} variant="outline" className="bg-muted text-foreground hover:bg-muted/80 hover:text-foreground border-none font-medium px-4">
                 Salvar Rascunho
               </Button>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6" onClick={() => navigate('/app/revisao/123')}>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6" onClick={handleAdvanceToReview}>
                 Avançar e Baixar PDF
               </Button>
             </div>

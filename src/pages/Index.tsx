@@ -285,7 +285,7 @@ const Index = () => {
                   )}
                   
                   {/* Profile Dropdown or Link */}
-                  <Link to="/profile">
+                  <Link to="/app/configuracoes">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer">
                        <span className="text-sm font-bold text-primary">{user?.name?.charAt(0) || 'U'}</span>
                     </div>
