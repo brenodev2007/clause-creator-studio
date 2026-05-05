@@ -395,7 +395,7 @@ const Index = () => {
               <div className="bg-secondary/30 px-6 py-4 border-b border-border">
                 <h2 className="text-lg font-semibold">Pré-visualização do Documento</h2>
               </div>
-              <div className="p-6 bg-slate-50/50">
+              <div className="p-6 bg-muted/50">
                 <ContractPreview ref={previewRef} data={contractData} />
               </div>
               

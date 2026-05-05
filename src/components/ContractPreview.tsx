@@ -38,7 +38,7 @@ const ContractPreview = forwardRef<HTMLDivElement, ContractPreviewProps>(
     return (
       <div
         ref={ref}
-        className="bg-white p-10 md:p-12 border border-border rounded-lg max-w-3xl mx-auto"
+        className="bg-card p-10 md:p-12 border border-border rounded-lg max-w-3xl mx-auto"
         style={{ fontFamily: "Georgia, serif" }}
       >
         {/* Header */}

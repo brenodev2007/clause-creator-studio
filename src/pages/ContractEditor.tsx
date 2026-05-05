@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Folder, ChevronDown, ChevronRight, FileText, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,54 @@ const initialContent = `
 
 export default function ContractEditor() {
   const navigate = useNavigate();
-  
+
+  const [customClauses, setCustomClauses] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('zelo_saved_clauses');
+    if (saved) {
+      setCustomClauses(JSON.parse(saved));
+    }
+  }, []);
+
+  const clauseLibrary = useMemo(() => {
+    const base = {
+      "Foro e Jurisdição": [
+        { title: "Foro Padrão (São Paulo)", content: "<p><strong>[Foro de Eleição]</strong></p><p>Fica eleito o foro da comarca da Capital do Estado de São Paulo para dirimir quaisquer dúvidas originárias deste contrato, com renúncia a qualquer outro, por mais privilegiado que seja.</p>" },
+        { title: "Foro - Cláusula Arbitral", content: "<p><strong>[Cláusula Arbitral]</strong></p><p>Qualquer litígio ou controvérsia decorrente deste contrato será resolvido por arbitragem, administrada pela Câmara de Mediação e Arbitragem, de acordo com suas regras.</p>" }
+      ],
+      "Rescisão Contratual": [
+        { title: "Aviso Prévio 30 Dias", content: "<p><strong>[Cláusula de Aviso Prévio]</strong></p><p>Qualquer das partes poderá rescindir o contrato mediante notificação prévia de 30 (trinta) dias, por escrito.</p>" },
+        { title: "Rescisão Imediata (Quebra de Sigilo)", content: "<p><strong>[Rescisão Imediata]</strong></p><p>Em caso de quebra de sigilo ou violação de confidencialidade, o contrato será rescindido imediatamente, sem prejuízo de perdas e danos.</p>" },
+        { title: "Multa por Rescisão Antecipada", content: "<p><strong>[Multa Rescisória]</strong></p><p>A rescisão imotivada antes do término do prazo implicará no pagamento de multa equivalente a 20% sobre o saldo devedor do contrato.</p>" }
+      ],
+      "Pagamento e Faturamento": [
+        { title: "Pagamento Mensal", content: "<p><strong>[Pagamento Mensal]</strong></p><p>O pagamento será realizado mensalmente, até o dia 5 (cinco) de cada mês, mediante emissão de nota fiscal.</p>" },
+        { title: "Pagamento por Marcos", content: "<p><strong>[Pagamento por Marcos de Entrega]</strong></p><p>O pagamento será efetuado conforme a entrega e aprovação dos marcos definidos no anexo, com faturamento em até 10 dias úteis após a aprovação.</p>" },
+        { title: "Juros e Correção", content: "<p><strong>[Atraso no Pagamento]</strong></p><p>O atraso no pagamento acarretará multa de 2% (dois por cento) e juros moratórios de 1% (um por cento) ao mês, pro rata die.</p>" }
+      ],
+      "Confidencialidade": [
+        { title: "Confidencialidade Padrão", content: "<p><strong>[Confidencialidade]</strong></p><p>As partes obrigam-se a manter absoluto sigilo sobre as informações trocadas durante a execução deste contrato, por um período de 5 (cinco) anos após seu término.</p>" },
+        { title: "Devolução de Informações", content: "<p><strong>[Devolução de Materiais]</strong></p><p>Ao término do contrato, a parte receptora deverá devolver ou destruir, sob comprovação, todos os materiais e documentos confidenciais recebidos.</p>" }
+      ],
+      "Objeto do Contrato": [
+        { title: "Prestação de Serviços Genérica", content: "<p><strong>[Objeto]</strong></p><p>O presente contrato tem por objeto a prestação de serviços de <span style=\"background-color: #e2e8f0; padding: 2px 4px; border-radius: 4px;\">[Descrição do Serviço]</span>, conforme detalhado no Anexo I.</p>" },
+        { title: "Licenciamento de Software", content: "<p><strong>[Objeto]</strong></p><p>O objeto deste contrato é a concessão de licença de uso, em caráter não exclusivo e intransferível, do software <span style=\"background-color: #e2e8f0; padding: 2px 4px; border-radius: 4px;\">[Nome do Software]</span>.</p>" }
+      ]
+    };
+
+    const combined: Record<string, {title: string, content: string}[]> = { ...base };
+    
+    customClauses.forEach(clause => {
+      if (!combined[clause.category]) {
+        combined[clause.category] = [];
+      }
+      combined[clause.category].push({ title: clause.title, content: clause.content });
+    });
+
+    return combined;
+  }, [customClauses]);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -76,197 +123,153 @@ export default function ContractEditor() {
     toast.success("Rascunho salvo com sucesso!");
   };
 
+  const handleSaveTemplate = () => {
+    if (!editor) return;
+    const htmlContent = editor.getHTML();
+    const newTemplate = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      name: `Modelo Personalizado - ${new Date().toLocaleDateString()}`,
+      content: htmlContent,
+      type: 'template'
+    };
+    
+    const saved = localStorage.getItem('zelo_saved_templates');
+    const existingTemplates = saved ? JSON.parse(saved) : [];
+    
+    localStorage.setItem('zelo_saved_templates', JSON.stringify([newTemplate, ...existingTemplates]));
+    toast.success("Modelo salvo com sucesso na sua galeria!");
+  };
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
-      {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 h-16 shrink-0 flex items-center px-6 justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-primary font-bold text-2xl italic">
-            <span className="text-primary">Z</span> Zelo
-          </div>
-          <div className="h-6 w-px bg-slate-300 mx-2" />
-          <span className="font-semibold text-slate-700">Editor de Cláusulas</span>
-        </div>
-
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to="/app/contratos" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Meus Contratos</Link>
-          <Link to="/app/modelos" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Modelos</Link>
-          <Link to="/profile" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Configurações</Link>
-          
-          <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-300 transition-colors border border-slate-300 ml-4">
-             <User className="w-4 h-4 text-slate-600" />
-          </div>
-        </nav>
-      </header>
-
+    <div className="flex flex-col h-full overflow-hidden bg-muted">
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Clause Library */}
-      <aside className="w-80 bg-white border-r border-slate-200 flex flex-col h-full shrink-0">
-        <div className="p-6 bg-slate-900 text-white rounded-tr-3xl rounded-br-3xl mr-4 my-4">
+      <aside className="w-80 bg-card border-r border-border flex flex-col h-full shrink-0">
+        <div className="p-6 bg-muted text-foreground rounded-tr-3xl rounded-br-3xl mr-4 my-4">
           <h2 className="text-lg font-bold mb-4">Biblioteca de Cláusulas</h2>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/80" />
             <Input 
               placeholder="Buscar" 
-              className="pl-9 bg-white text-slate-900 border-none h-10"
+              className="pl-9 bg-card text-foreground border-none h-10"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="foro" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-slate-100 font-semibold text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  Foro e Jurisdição
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-2">
-                Conteúdo de Foro
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="rescisao" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-slate-100 font-semibold text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  Rescisão Contratual
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="flex flex-col gap-2 pt-2 pb-4">
-                <button 
-                  onClick={() => insertClause('<p><strong>[Cláusula de Aviso Prévio]</strong></p><p>Qualquer das partes poderá rescindir o contrato com aviso de 30 dias.</p>')}
-                  className="text-left px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors flex items-center gap-2"
-                >
-                  <FileText className="w-3 h-3" /> Cláusula de Aviso Prévio
-                </button>
-                <button 
-                  onClick={() => insertClause('<p><strong>[Rescisão Imediata]</strong></p><p>Em caso de quebra de sigilo, o contrato será rescindido imediatamente.</p>')}
-                  className="text-left px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors flex items-center gap-2"
-                >
-                  <FileText className="w-3 h-3" /> Rescisão Imediata
-                </button>
-                <button 
-                  className="text-left px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors flex items-center gap-2"
-                >
-                  <FileText className="w-3 h-3" /> Indenização
-                </button>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="pagamento" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-slate-100 font-semibold text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  Pagamento e Faturamento
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-2">
-                Conteúdo de Pagamento
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="confidencialidade" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-slate-100 font-semibold text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  Confidencialidade
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-2">
-                Conteúdo de Confidencialidade
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="objeto" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-slate-100 font-semibold text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  Objeto do Contrato
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-2">
-                Conteúdo de Objeto
-              </AccordionContent>
-            </AccordionItem>
+            {Object.entries(clauseLibrary).map(([category, clauses]) => (
+              <AccordionItem key={category} value={category} className="border-none">
+                <AccordionTrigger className="hover:no-underline py-3 px-2 rounded-md hover:bg-accent font-semibold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <Folder className="w-4 h-4" />
+                    {category}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-2 pt-2 pb-4">
+                  {clauses.map((clause) => (
+                    <button 
+                      key={clause.title}
+                      onClick={() => insertClause(clause.content)}
+                      className="text-left px-4 py-2 text-sm text-muted-foreground bg-secondary hover:bg-primary/10 hover:text-primary rounded-md transition-colors flex items-center gap-2 group"
+                    >
+                      <FileText className="w-3 h-3 shrink-0 group-hover:text-primary transition-colors" />
+                      <span className="truncate">{clause.title}</span>
+                    </button>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         </div>
       </aside>
 
       {/* Main Editor Area */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Novo Contrato de Prestação de Serviços</h1>
-          <div className="flex items-center gap-3">
-            <Button onClick={handleSaveDraft} variant="outline" className="bg-slate-900 text-white hover:bg-slate-800 hover:text-white border-none font-medium px-6">
-              Salvar Rascunho
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6" onClick={() => navigate('/app/revisao/123')}>
-              Avançar e Baixar PDF
-            </Button>
+      <main className="flex-1 flex flex-col h-full overflow-hidden bg-muted p-6">
+        <div className="flex flex-col gap-2 mb-6">
+          <button 
+            onClick={() => navigate('/app/modelos')} 
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors w-fit"
+          >
+            <ChevronDown className="w-4 h-4 rotate-90" /> Voltar para Modelos
+          </button>
+          
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-foreground">Novo Contrato de Prestação de Serviços</h1>
+            <div className="flex items-center gap-3">
+              <Button onClick={handleSaveTemplate} variant="outline" className="bg-card text-foreground hover:bg-accent font-medium px-4">
+                Salvar Modelo
+              </Button>
+              <Button onClick={handleSaveDraft} variant="outline" className="bg-muted text-foreground hover:bg-muted/80 hover:text-foreground border-none font-medium px-4">
+                Salvar Rascunho
+              </Button>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6" onClick={() => navigate('/app/revisao/123')}>
+                Avançar e Baixar PDF
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
+        <div className="flex-1 bg-card border border-border rounded-xl shadow-sm flex flex-col overflow-hidden">
           {/* Toolbar */}
-          <div className="border-b border-slate-200 p-2 flex items-center gap-1 bg-white">
+          <div className="border-b border-border p-2 flex items-center gap-1 bg-card">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive('bold') ? 'bg-slate-100 font-bold' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive('bold') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="font-bold font-serif text-lg leading-none">B</span>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive('italic') ? 'bg-slate-100 font-bold' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive('italic') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="italic font-serif text-lg leading-none">I</span>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive('underline') ? 'bg-slate-100 font-bold' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive('underline') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="underline font-serif text-lg leading-none">U</span>
             </button>
             
-            <div className="w-px h-6 bg-slate-200 mx-2" />
+            <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive({ textAlign: 'left' }) ? 'bg-slate-100' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive({ textAlign: 'left' }) ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/></svg>
             </button>
             <button
               onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive({ textAlign: 'center' }) ? 'bg-slate-100' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive({ textAlign: 'center' }) ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/></svg>
             </button>
             
-            <div className="w-px h-6 bg-slate-200 mx-2" />
+            <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive('bulletList') ? 'bg-slate-100' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive('bulletList') ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-2 rounded hover:bg-slate-100 ${editor.isActive('orderedList') ? 'bg-slate-100' : ''}`}
+              className={`p-2 rounded hover:bg-accent ${editor.isActive('orderedList') ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
             </button>
             
-            <div className="w-px h-6 bg-slate-200 mx-2" />
+            <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
               onClick={() => editor.chain().focus().insertContent('<span style="background-color: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: 500; font-family: monospace;">[Nova Variável]</span>').run()}
-              className="flex items-center gap-1 px-3 py-1.5 rounded hover:bg-slate-100 text-sm font-medium text-slate-700"
+              className="flex items-center gap-1 px-3 py-1.5 rounded hover:bg-accent text-sm font-medium text-foreground"
             >
-              <span className="font-mono text-xs bg-slate-200 px-1 rounded">&lt;/&gt;</span> Variável
+              <span className="font-mono text-xs bg-secondary px-1 rounded">&lt;/&gt;</span> Variável
             </button>
           </div>
 

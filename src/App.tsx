@@ -45,19 +45,9 @@ const App = () => (
                 <Route path="contratos" element={<ContratosList />} />
                 <Route path="modelos" element={<ModelosGallery />} />
                 <Route path="clausulas" element={<ClausulasLibrary />} />
+                <Route path="editor/:id" element={<ContractEditor />} />
+                <Route path="revisao/:id" element={<ContractReview />} />
               </Route>
-
-              {/* Editor/Review routes without Global Sidebar */}
-              <Route path="/app/editor/:id" element={
-                <ProtectedRoute>
-                  <ContractEditor />
-                </ProtectedRoute>
-              } />
-              <Route path="/app/revisao/:id" element={
-                <ProtectedRoute>
-                  <ContractReview />
-                </ProtectedRoute>
-              } />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

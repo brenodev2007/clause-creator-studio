@@ -146,7 +146,7 @@ const SignaturePad = ({ value, onChange, label = "Assinatura" }: SignaturePadPro
 
         <TabsContent value="draw" className="mt-3">
           <div className="space-y-2">
-            <div className="relative border border-border rounded-lg overflow-hidden bg-white">
+            <div className="relative border border-border rounded-lg overflow-hidden bg-card">
               <canvas
                 ref={canvasRef}
                 className="w-full h-32 cursor-crosshair touch-none"

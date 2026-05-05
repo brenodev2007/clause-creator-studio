@@ -19,8 +19,8 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto w-full px-6 py-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Olá, {user?.name || "Usuário"}!</h1>
-          <p className="text-slate-500 mt-1">Bem-vindo de volta ao seu painel de contratos.</p>
+          <h1 className="text-3xl font-bold text-foreground">Olá, {user?.name || "Usuário"}!</h1>
+          <p className="text-muted-foreground mt-1">Bem-vindo de volta ao seu painel de contratos.</p>
         </div>
         <Link to="/app/editor/novo">
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 h-11">
@@ -36,23 +36,23 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             key={stat.name} 
-            className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow"
+            className="bg-card border border-border rounded-xl p-6 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow"
           >
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bg}`}>
               {stat.icon}
             </div>
             <div>
-              <p className="text-slate-500 text-sm font-medium">{stat.name}</p>
-              <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
+              <p className="text-muted-foreground text-sm font-medium">{stat.name}</p>
+              <h3 className="text-2xl font-bold text-foreground">{stat.value}</h3>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <h2 className="text-xl font-bold text-slate-900 mb-6">Atividade Recente</h2>
+      <h2 className="text-xl font-bold text-foreground mb-6">Atividade Recente</h2>
       
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 text-center text-slate-500">
+      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 text-center text-muted-foreground">
           Nenhuma atividade recente encontrada.
         </div>
       </div>

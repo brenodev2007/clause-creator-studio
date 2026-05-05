@@ -60,7 +60,7 @@ const Login = () => {
     <div className="flex min-h-screen w-full bg-background overflow-hidden relative">
       
       {/* Left Side - Artistic Panel (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 relative bg-slate-50 overflow-hidden items-center justify-center p-12">
+      <div className="hidden lg:flex w-1/2 relative bg-muted overflow-hidden items-center justify-center p-12">
          {/* Abstract Shapes */}
          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3" />
          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-3xl opacity-50 -translate-x-1/3 translate-y-1/3" />
@@ -70,24 +70,24 @@ const Login = () => {
            <div className="mb-8 flex justify-center lg:justify-start">
              <img src="/logo.png" alt="Logo" className="h-32 w-auto object-contain" />
            </div>
-           <h1 className="text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+           <h1 className="text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
              Transforme a gestão dos seus contratos.
            </h1>
-           <p className="text-lg text-slate-600 mb-10 leading-relaxed">
+           <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
              Junte-se a milhares de profissionais que usam nossa IA para criar, validar e assinar documentos com segurança jurídica.
            </p>
            
            {/* Testimonial */}
-           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+           <div className="bg-card border border-border p-6 rounded-2xl shadow-lg shadow-none">
              <div className="flex gap-1 mb-3 text-amber-500">
                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
              </div>
-             <p className="text-slate-700 italic mb-4">"A melhor plataforma de contratos que já usei. Simples, rápida e o suporte é incrível."</p>
+             <p className="text-foreground italic mb-4">"A melhor plataforma de contratos que já usei. Simples, rápida e o suporte é incrível."</p>
              <div className="flex items-center gap-3">
                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-xs">RJ</div>
                <div>
-                 <div className="text-sm font-semibold text-slate-900">Ricardo Junior</div>
-                 <div className="text-xs text-slate-500">Advogado Associado</div>
+                 <div className="text-sm font-semibold text-foreground">Ricardo Junior</div>
+                 <div className="text-xs text-muted-foreground">Advogado Associado</div>
                </div>
              </div>
            </div>

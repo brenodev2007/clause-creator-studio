@@ -76,7 +76,7 @@ const Register = () => {
     <div className="flex min-h-screen w-full bg-background overflow-hidden relative">
       
        {/* Left Side - Artistic Panel (Hidden on mobile) */}
-       <div className="hidden lg:flex w-1/2 relative bg-slate-50 overflow-hidden items-center justify-center p-12 order-2">
+       <div className="hidden lg:flex w-1/2 relative bg-muted overflow-hidden items-center justify-center p-12 order-2">
          {/* Abstract Shapes */}
          <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-600/5 rounded-full blur-3xl opacity-60 -translate-x-1/3 -translate-y-1/3" />
          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl opacity-50 translate-x-1/3 translate-y-1/3" />
@@ -87,7 +87,7 @@ const Register = () => {
              <img src="/logo.png" alt="Logo" className="h-32 w-auto object-contain" />
            </div>
            
-           <h1 className="text-4xl font-bold tracking-tight text-slate-900 leading-tight">
+           <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
              Segurança e eficiência em um só lugar.
            </h1>
            
@@ -98,11 +98,11 @@ const Register = () => {
                "Exportação em PDF profissional",
                "Armazenamento seguro em nuvem"
              ].map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-4 p-4 rounded-xl bg-white border border-slate-200 hover:shadow-md transition-all">
+                <div key={idx} className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:shadow-md transition-all">
                   <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
                     <Sparkles className="w-4 h-4 text-blue-500" />
                   </div>
-                  <span className="text-slate-700 font-medium">{feature}</span>
+                  <span className="text-foreground font-medium">{feature}</span>
                 </div>
              ))}
            </div>
