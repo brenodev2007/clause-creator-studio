@@ -14,6 +14,13 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminPanel from "./pages/AdminPanel";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
+import ContratosList from "./pages/ContratosList";
+import ModelosGallery from "./pages/ModelosGallery";
+import ContractEditor from "./pages/ContractEditor";
+import ContractReview from "./pages/ContractReview";
+import Dashboard from "./pages/Dashboard";
+import ClausulasLibrary from "./pages/ClausulasLibrary";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -27,9 +34,28 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Login />} />
+              {/* App Routes with Layout */}
               <Route path="/app" element={
                 <ProtectedRoute>
-                  <Index />
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }>
+                {/* Default route for /app */}
+                <Route index element={<Dashboard />} />
+                <Route path="contratos" element={<ContratosList />} />
+                <Route path="modelos" element={<ModelosGallery />} />
+                <Route path="clausulas" element={<ClausulasLibrary />} />
+              </Route>
+
+              {/* Editor/Review routes without Global Sidebar */}
+              <Route path="/app/editor/:id" element={
+                <ProtectedRoute>
+                  <ContractEditor />
+                </ProtectedRoute>
+              } />
+              <Route path="/app/revisao/:id" element={
+                <ProtectedRoute>
+                  <ContractReview />
                 </ProtectedRoute>
               } />
               <Route path="/login" element={<Login />} />
