@@ -2,11 +2,11 @@ import { useAuth } from "../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User as UserIcon, Shield, Pencil, Check, X, KeyRound } from "lucide-react";
+import { LogOut, User as UserIcon, Shield, Pencil, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 const Profile = () => {
   const { user, token, logout, updateUser } = useAuth();
@@ -64,156 +64,143 @@ const Profile = () => {
     setEditName(user?.name || "");
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
   };
 
   return (
     <motion.div 
-      className="max-w-4xl mx-auto w-full px-6 py-8"
+      className="max-w-2xl mx-auto w-full px-6 py-12"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <motion.div variants={itemVariants} className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-        <p className="text-muted-foreground mt-1">Gerencie suas informações pessoais e preferências de conta.</p>
+      <motion.div variants={itemVariants} className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">Meu Perfil</h1>
+        <p className="text-muted-foreground mt-2">Gerencie suas informações e preferências de conta</p>
       </motion.div>
 
-      {/* Profile Card */}
-      <motion.div variants={itemVariants} className="bg-card border border-border rounded-2xl p-8 mb-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-5">
-            <Avatar className="w-20 h-20 border-4 border-background shadow-xl">
+      <motion.div variants={itemVariants} className="bg-card border border-border rounded-3xl shadow-xl shadow-primary/5 overflow-hidden relative">
+        {/* Decorative background glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+        {/* Header section with Avatar */}
+        <div className="px-8 pt-10 pb-6 flex flex-col items-center text-center relative z-10 border-b border-border/50">
+          <div className="relative group mb-4">
+            <Avatar className="w-28 h-28 border-4 border-background shadow-2xl transition-transform duration-500 group-hover:scale-105">
               <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || 'User'}`} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+              <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bold">
                 {user?.name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{user?.name || "Usuário"}</h2>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
-              {user?.is_admin && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 mt-2 rounded-full text-xs font-semibold bg-red-500/10 text-red-500">
-                  <Shield className="w-3 h-3" />
-                  Administrador
-                </span>
-              )}
-            </div>
+            <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-background rounded-full shadow-sm" />
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleLogout} 
-            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair da Conta
-          </Button>
+          <h2 className="text-2xl font-bold text-foreground">{user?.name || "Usuário"}</h2>
+          <p className="text-muted-foreground font-medium">{user?.email}</p>
+          
+          {user?.is_admin && (
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 mt-3 rounded-full text-[10px] uppercase tracking-wider font-bold bg-primary/10 text-primary border border-primary/20">
+              <Shield className="w-3.5 h-3.5" />
+              Administrador do Sistema
+            </span>
+          )}
         </div>
-      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Personal Information */}
-        <motion.div variants={itemVariants} className="bg-card border border-border rounded-2xl overflow-hidden">
-          <div className="px-6 py-5 border-b border-border flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <UserIcon className="w-4 h-4 text-primary" />
+        {/* Content section */}
+        <div className="p-8 space-y-8 relative z-10">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-primary" />
+              </div>
+              <h3 className="font-bold text-foreground">Informações da Conta</h3>
             </div>
-            <div>
-              <h3 className="font-bold text-foreground">Dados Pessoais</h3>
-              <p className="text-xs text-muted-foreground">Suas informações de identificação</p>
-            </div>
-          </div>
-          <div className="p-6 space-y-5">
-            {/* Name Field — Editable */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Nome Completo</label>
+
+            {/* Name Field */}
+            <div className="space-y-2 bg-muted/30 p-4 rounded-2xl border border-border/50 transition-colors hover:bg-muted/50">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Nome Completo</label>
+                {!isEditingName && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-7 px-2 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10 rounded-md"
+                    onClick={() => { setEditName(user?.name || ""); setIsEditingName(true); }}
+                  >
+                    Editar
+                  </Button>
+                )}
+              </div>
+              
               {isEditingName ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-1">
                   <Input 
                     value={editName} 
                     onChange={(e) => setEditName(e.target.value)} 
-                    className="h-10" 
+                    className="h-10 bg-background border-primary/30 focus-visible:ring-primary shadow-sm" 
                     autoFocus 
                     disabled={isSaving}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveName()} 
                   />
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="shrink-0 text-green-500 hover:text-green-600 hover:bg-green-500/10" 
-                    onClick={handleSaveName}
-                    disabled={isSaving}
-                  >
-                    <Check className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="shrink-0 text-muted-foreground hover:text-destructive" 
-                    onClick={cancelEditName}
-                    disabled={isSaving}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      className="h-10 w-10 text-green-500 hover:text-green-600 hover:bg-green-500/10 rounded-xl" 
+                      onClick={handleSaveName}
+                      disabled={isSaving}
+                    >
+                      <Check className="w-5 h-5" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl" 
+                      onClick={cancelEditName}
+                      disabled={isSaving}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between group">
-                  <span className="text-sm font-medium text-foreground">{user?.name || "—"}</span>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary h-8 w-8" 
-                    onClick={() => { setEditName(user?.name || ""); setIsEditingName(true); }}
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
+                <p className="text-sm font-semibold text-foreground py-1">{user?.name || "—"}</p>
               )}
             </div>
 
-            {/* Email Field — Read Only */}
-            <div className="space-y-2 pt-4 border-t border-border/50">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">E-mail</label>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground truncate">{user?.email || "—"}</span>
+            {/* Email Field */}
+            <div className="space-y-2 bg-muted/30 p-4 rounded-2xl border border-border/50 transition-colors hover:bg-muted/50 opacity-80">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">E-mail Cadastrado</label>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-sm font-semibold text-foreground truncate">{user?.email || "—"}</p>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted border border-border/50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Não editável</span>
               </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Security */}
-        <motion.div variants={itemVariants} className="bg-card border border-border rounded-2xl overflow-hidden">
-          <div className="px-6 py-5 border-b border-border flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <KeyRound className="w-4 h-4 text-primary" />
+          <div className="pt-4 border-t border-border/50 flex items-center justify-between gap-4">
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-foreground">Sair da Sessão</p>
+              <p className="text-[10px] text-muted-foreground">Desconectar deste dispositivo com segurança</p>
             </div>
-            <div>
-              <h3 className="font-bold text-foreground">Segurança</h3>
-              <p className="text-xs text-muted-foreground">Configurações de acesso e proteção</p>
-            </div>
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout} 
+              className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 font-bold px-6 h-11 rounded-xl transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              Encerrar Sessão
+            </Button>
           </div>
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Alterar Senha</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Recomendamos trocar sua senha periodicamente.</p>
-              </div>
-              <Button variant="outline" className="gap-2" onClick={() => toast.info("Funcionalidade em breve!")}>
-                <KeyRound className="w-4 h-4" />
-                Alterar
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

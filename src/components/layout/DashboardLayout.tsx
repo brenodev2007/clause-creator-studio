@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { User, Bell, LayoutDashboard, Folder, FileText, Settings, FileBox, PanelLeftClose, PanelLeftOpen, Shield } from "lucide-react"; // icons
+import { User, Bell, LayoutDashboard, Folder, FileText, Settings, FileBox, PanelLeftClose, PanelLeftOpen, Shield, LogOut } from "lucide-react"; // icons
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function DashboardLayout() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -179,21 +179,53 @@ export function DashboardLayout() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="flex items-center gap-3 pl-6 border-l border-border">
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-bold text-foreground">{user?.name || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground">Plano Pro</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer hover:bg-secondary/80 transition-colors border-2 border-background shadow-sm">
-                {user?.name ? (
-                  <span className="text-sm font-bold text-secondary-foreground">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                ) : (
-                  <User className="w-5 h-5 text-secondary-foreground" />
-                )}
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 pl-6 border-l border-border cursor-pointer group outline-none">
+                  <div className="text-right hidden md:block group-hover:opacity-80 transition-opacity">
+                    <p className="text-sm font-bold text-foreground leading-tight">{user?.name || "Usuário"}</p>
+                  
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20 group-hover:border-primary transition-all duration-300 shadow-sm relative overflow-hidden">
+                    {user?.name ? (
+                      <span className="text-sm font-bold text-primary">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    ) : (
+                      <User className="w-5 h-5 text-primary" />
+                    )}
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-2 p-2 rounded-xl shadow-xl border-border animate-in fade-in slide-in-from-top-2 duration-200">
+                <DropdownMenuLabel className="px-3 py-2">
+                  <p className="text-sm font-bold text-foreground">Minha Conta</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="my-1 bg-border/50" />
+                <DropdownMenuItem className="rounded-lg px-3 py-2.5 cursor-pointer hover:bg-accent focus:bg-accent transition-colors flex items-center gap-2" asChild>
+                  <Link to="/app/configuracoes">
+                    <Settings className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Configurações</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-lg px-3 py-2.5 cursor-pointer hover:bg-accent focus:bg-accent transition-colors flex items-center gap-2" asChild>
+                  <Link to="/app/configuracoes">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Ver Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="my-1 bg-border/50" />
+                <DropdownMenuItem 
+                  className="rounded-lg px-3 py-2.5 cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10 transition-colors flex items-center gap-2"
+                  onClick={() => logout()}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm font-bold">Encerrar Sessão</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
