@@ -12,6 +12,7 @@ interface Signer {
   id: string;
   name: string;
   email: string;
+  role?: string;
   signedAt?: string;
 }
 
@@ -32,6 +33,7 @@ export default function ContractReview() {
   
   const [contract, setContract] = useState<ContractData | null>(null);
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
   const [signers, setSigners] = useState<Signer[]>([]);
   const [useOrder, setUseOrder] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -77,35 +79,25 @@ export default function ContractReview() {
     const newSigner: Signer = {
       id: crypto.randomUUID(),
       name: mockName,
-      email: email.trim()
+      email: email.trim(),
+      role: role.trim()
     };
 
     const updated = [...signers, newSigner];
     setSigners(updated);
     setEmail("");
+    setRole("");
+    
+    // Save automatically to storage
+    updateContractInStorage({ signers: updated });
   };
 
   const handleRemoveSigner = (signerId: string) => {
     const updated = signers.filter(s => s.id !== signerId);
     setSigners(updated);
-  };
-
-  const handleSendToSignature = () => {
-    if (signers.length === 0) {
-      toast.error("Adicione pelo menos um signatário para enviar.");
-      return;
-    }
     
-    // Save signers and change status to Pendente
-    updateContractInStorage({ 
-      status: 'Pendente', 
-      signers: signers 
-    });
-    
-    toast.success(`Contrato enviado para ${signers.length} signatário(s)!`);
-    setTimeout(() => {
-      navigate('/app/contratos');
-    }, 1200);
+    // Save automatically to storage
+    updateContractInStorage({ signers: updated });
   };
 
   const handleDownloadPDF = async () => {
@@ -294,6 +286,9 @@ export default function ContractReview() {
                           <div key={signer.id} style={{ textAlign: 'center' }}>
                             <div style={{ borderTop: '1px solid #000', paddingTop: '12px', marginTop: '40px' }}>
                               <p style={{ fontWeight: 'bold', fontSize: '14px', color: '#000' }}>{signer.name}</p>
+                              {signer.role && (
+                                <p style={{ fontSize: '12px', fontWeight: '500', color: '#334155', marginBottom: '2px' }}>{signer.role}</p>
+                              )}
                               <p style={{ fontSize: '12px', color: '#64748b' }}>{signer.email}</p>
                               <div style={{ marginTop: '8px', fontSize: '10px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
@@ -331,30 +326,40 @@ export default function ContractReview() {
             </Button>
 
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h3 className="text-xl font-bold text-foreground mb-4">Assinatura Digital</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">Campos de Assinatura</h3>
               
-              <div className="space-y-4">
-                <Input 
-                  placeholder="Adicionar e-mail do signatário" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddSigner()}
-                  className="h-12 text-base border-border/80"
-                />
-                <Button 
-                  onClick={handleAddSigner}
-                  variant="outline" 
-                  className="w-full border-border/80 text-foreground hover:bg-accent h-12"
-                >
-                  Adicionar Signatário
-                </Button>
+                <div className="space-y-3">
+                  <Input 
+                    placeholder="Nome ou E-mail do signatário" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddSigner()}
+                    className="h-11 border-border/80"
+                  />
+                  <Input 
+                    placeholder="Cargo (ex: Diretor, Testemunha)" 
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddSigner()}
+                    className="h-11 border-border/80"
+                  />
+                  <Button 
+                    onClick={handleAddSigner}
+                    variant="outline" 
+                    className="w-full border-border/80 text-foreground hover:bg-accent h-11"
+                  >
+                    Adicionar Campo de Assinatura
+                  </Button>
+                </div>
                 
                 {signers.length > 0 && (
                   <div className="space-y-3 mt-4 max-h-48 overflow-y-auto pr-1">
                     {signers.map((signer, index) => (
                       <div key={signer.id} className="bg-muted border border-border rounded-lg p-3 relative group">
                         <p className="font-bold text-foreground text-sm truncate pr-6">{signer.name}</p>
-                        <p className="font-normal text-muted-foreground text-xs truncate">{signer.email}</p>
+                        <p className="font-normal text-muted-foreground text-xs truncate">
+                          {signer.role ? `${signer.role} • ` : ''}{signer.email}
+                        </p>
                         <p className="text-xs mt-1 flex items-center gap-1">
                           {signer.signedAt ? (
                             <span className="text-green-500 flex items-center gap-1">
@@ -378,46 +383,12 @@ export default function ContractReview() {
                   </div>
                 )}
 
-                <div className="flex items-center space-x-2 pt-2 pb-2">
-                  <Checkbox 
-                    id="order" 
-                    checked={useOrder}
-                    onCheckedChange={(checked) => setUseOrder(checked as boolean)}
-                    className="border-primary data-[state=checked]:bg-primary" 
-                  />
-                  <label
-                    htmlFor="order"
-                    className="text-sm font-semibold leading-none cursor-pointer text-foreground"
-                  >
-                    Definir ordem de assinatura
-                  </label>
+                  <p className="text-xs text-muted-foreground text-center italic py-2">
+                    Os campos acima serão incluídos automaticamente no rodapé do PDF.
+                  </p>
                 </div>
 
-                <Button 
-                  onClick={handleSendToSignature}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-12 rounded-lg"
-                  disabled={signers.length === 0}
-                >
-                  Enviar para Assinatura
-                </Button>
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
-              <div className="flex gap-4 cursor-pointer group" onClick={() => {
-                const shareUrl = `${window.location.origin}/app/revisao/${id}`;
-                navigator.clipboard.writeText(shareUrl);
-                toast.success("Link copiado para a área de transferência!");
-              }}>
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                  <LinkIcon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">Compartilhar por Link</h4>
-                  <p className="text-sm text-muted-foreground mt-1">Gere um link para revisão externa do documento.</p>
-                </div>
-              </div>
-              
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <div className="flex gap-4 cursor-pointer group" onClick={() => navigate(`/app/editor/${id}`)}>
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                   <Edit3 className="w-5 h-5 text-primary" />

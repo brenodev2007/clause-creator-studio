@@ -4,6 +4,7 @@ import { Search, Folder, ChevronDown, ChevronRight, FileText, User, PanelLeftClo
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -13,7 +14,7 @@ import { ImagePlus } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, Cloud, Loader2 } from "lucide-react";
+import { CheckCircle2, Cloud, Loader2, Trash2 } from "lucide-react";
 
 const initialContent = `
 <h2>CLÁUSULA 1: OBJETO DO CONTRATO.</h2>
@@ -470,6 +471,24 @@ export default function ContractEditor() {
 
           {/* Editor Content Area */}
           <div className="flex-1 overflow-y-auto p-8">
+            {editor && (
+              <BubbleMenu 
+                editor={editor} 
+                tippyOptions={{ duration: 100 }} 
+                shouldShow={({ editor }) => editor.isActive('image')}
+              >
+                <div className="bg-white border border-border shadow-xl rounded-xl p-1 flex gap-1 animate-in fade-in zoom-in duration-200">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => editor.chain().focus().deleteSelection().run()}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 font-semibold"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" /> Remover Imagem
+                  </Button>
+                </div>
+              </BubbleMenu>
+            )}
             <EditorContent editor={editor} />
           </div>
         </div>
