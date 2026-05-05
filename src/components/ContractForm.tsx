@@ -8,6 +8,7 @@ import { ContractData } from "@/types/contract";
 import { Plus, X, Upload, Pencil, Check, AlertCircle, CheckCircle2 } from "lucide-react";
 import { maskCNPJ, maskCPFOrCNPJ, maskPhone, maskBankAgency, maskBankAccount, validateCNPJ, validateCPFOrCNPJ } from "@/hooks/use-input-masks";
 import SignaturePad from "@/components/SignaturePad";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 interface ContractFormProps {
   data: ContractData;
@@ -108,15 +109,19 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
     return numValue ? parseFloat(numValue) : 0;
   };
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3 className="font-semibold text-foreground mb-4">{children}</h3>
+  const SectionTitle = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <h3 className={`font-semibold text-foreground text-lg ${className}`}>{children}</h3>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
+      <Accordion type="multiple" defaultValue={["contractor", "client", "details", "clauses"]} className="w-full space-y-4">
       {/* Logo Upload */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <SectionTitle>Logo da Empresa</SectionTitle>
+      <AccordionItem value="logo" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Logo da Empresa</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <label className="block cursor-pointer">
           <div className={`border border-dashed rounded-lg p-6 text-center transition-colors ${
             data.logo 
@@ -154,11 +159,15 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             className="hidden"
           />
         </label>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Contractor Info */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <SectionTitle>Dados do Contratado</SectionTitle>
+      <AccordionItem value="contractor" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Dados do Contratado</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="contractorName" className="text-sm">Razão Social <span className="text-destructive">*</span></Label>
@@ -231,11 +240,15 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
         </div>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Bank Info */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <SectionTitle>Dados Bancários</SectionTitle>
+      <AccordionItem value="bank" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Dados Bancários</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="bankName" className="text-sm">Banco <span className="text-destructive">*</span></Label>
@@ -284,11 +297,15 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
         </div>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Client Info */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <SectionTitle>Dados do Cliente</SectionTitle>
+      <AccordionItem value="client" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Dados do Cliente</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm">Nome / Razão Social <span className="text-destructive">*</span></Label>
@@ -364,11 +381,15 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
         </div>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Contract Details */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <SectionTitle>Detalhes do Contrato</SectionTitle>
+      <AccordionItem value="details" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Detalhes do Contrato</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="serviceDescription" className="text-sm">Descrição do Serviço <span className="text-destructive">*</span></Label>
@@ -441,17 +462,17 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             </div>
           </div>
         </div>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Additional Clauses */}
-      <section className="animate-in pb-6 border-b border-border/50">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">Cláusulas</h3>
-          {data.additionalClauses.length > 0 && (
-            <span className="tag-minimal">
-              {data.additionalClauses.length} cláusula{data.additionalClauses.length !== 1 ? 's' : ''}
-            </span>
-          )}
+      <AccordionItem value="clauses" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Cláusulas Adicionais</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
+        <div className="flex items-center justify-between mb-4 mt-2">
+          <span className="text-sm text-muted-foreground">Adicione regras específicas ao contrato.</span>
         </div>
 
         {/* Add new clause */}
@@ -572,11 +593,15 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             <p className="text-xs mt-1">Selecione um modelo ou adicione manualmente</p>
           </div>
         )}
-      </section>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Signatures */}
-      <section className="animate-in">
-        <SectionTitle>Assinaturas Digitais</SectionTitle>
+      <AccordionItem value="signatures" className="border border-border/50 rounded-xl bg-card px-6 shadow-sm data-[state=open]:pb-2">
+        <AccordionTrigger className="hover:no-underline py-5">
+          <SectionTitle className="mb-0">Assinaturas Digitais</SectionTitle>
+        </AccordionTrigger>
+        <AccordionContent className="pt-2 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <SignaturePad
             label="Assinatura do Contratante"
@@ -589,7 +614,9 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             onChange={(signature) => onChange({ ...data, contractorSignature: signature })}
           />
         </div>
-      </section>
+        </AccordionContent>
+      </AccordionItem>
+      </Accordion>
     </div>
   );
 };

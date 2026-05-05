@@ -273,23 +273,6 @@ const Index = () => {
                     tokens={tokens}
                     dailyLimit={dailyLimit}
                   />
-                   <Button
-                    onClick={() => requireAuth(handleSaveContract)}
-                    variant="outline"
-                    className="h-9 px-4 rounded-md hidden sm:flex"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Salvar
-                  </Button>
-                  <Button
-                    onClick={() => requireAuth(generatePDF)}
-                    disabled={isGenerating}
-                    className="btn-primary h-9 px-4 rounded-md hidden sm:flex"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    {isGenerating ? "Gerando..." : "Exportar PDF"}
-                  </Button>
-                  
                   {user?.is_admin && (
                     <Button
                       onClick={() => navigate('/admin')}
@@ -384,20 +367,23 @@ const Index = () => {
               {/* Right Column: Main Form */}
               <div className="lg:col-span-8">
                 <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-                  <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between">
+                  <div className="bg-secondary/30 px-6 py-4 border-b border-border">
                     <h2 className="text-lg font-semibold">Formulário de Contrato</h2>
-                    <Button
-                      onClick={() => requireAuth(handleSaveContract)}
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                    >
-                      <Save className="w-3.5 h-3.5 mr-2" />
-                      Salvar Progresso
-                    </Button>
                   </div>
                   <div className="p-6">
                     <ContractForm data={contractData} onChange={setContractData} />
+                  </div>
+                  
+                  {/* Sticky Action Footer */}
+                  <div className="sticky bottom-0 z-10 bg-card/95 backdrop-blur-md border-t border-border p-4 flex items-center justify-end gap-3 rounded-b-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
+                    <Button onClick={() => requireAuth(handleSaveContract)} variant="outline" className="h-10 px-6">
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Rascunho
+                    </Button>
+                    <Button onClick={() => setActiveTab('preview')} className="btn-primary h-10 px-6 shadow-md shadow-primary/20">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visualizar Contrato
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -406,20 +392,27 @@ const Index = () => {
 
           <TabsContent value="preview" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="bg-secondary/30 px-6 py-4 border-b border-border">
                 <h2 className="text-lg font-semibold">Pré-visualização do Documento</h2>
-                <Button
-                  onClick={() => requireAuth(generatePDF)}
-                  disabled={isGenerating}
-                  size="sm"
-                  className="h-8 btn-primary"
-                >
-                  <Download className="w-3.5 h-3.5 mr-2" />
-                  {isGenerating ? "Gerando..." : "Baixar PDF"}
-                </Button>
               </div>
               <div className="p-6 bg-slate-50/50">
                 <ContractPreview ref={previewRef} data={contractData} />
+              </div>
+              
+              {/* Sticky Action Footer for Preview */}
+              <div className="sticky bottom-0 z-10 bg-card/95 backdrop-blur-md border-t border-border p-4 flex items-center justify-between gap-3 rounded-b-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
+                <Button onClick={() => setActiveTab('edit')} variant="outline" className="h-10 px-6">
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Voltar para Edição
+                </Button>
+                <Button 
+                  onClick={() => requireAuth(generatePDF)} 
+                  disabled={isGenerating} 
+                  className="btn-primary h-11 px-8 text-base shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  {isGenerating ? "Gerando PDF..." : "Exportar Contrato em PDF"}
+                </Button>
               </div>
             </div>
           </TabsContent>
