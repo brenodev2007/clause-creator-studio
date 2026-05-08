@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
+import { useTokens } from "@/hooks/use-tokens";
+import { AlertCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +17,7 @@ import {
 
 export function DashboardLayout() {
   const { user, logout } = useAuth();
+  const { tokens } = useTokens();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -231,6 +234,23 @@ export function DashboardLayout() {
 
         {/* Scrollable Main Content */}
         <main className="flex-1 overflow-y-auto">
+          {tokens === 0 && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="bg-destructive/10 border-b border-destructive/20 px-8 py-3 flex items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                <p className="text-sm font-medium text-destructive">
+                  Você esgotou seus tokens diários. Suas funcionalidades de exportação estão limitadas até o reset automático (00:00).
+                </p>
+              </div>
+              <Link to="/app/configuracoes" className="text-xs font-bold text-destructive hover:underline uppercase tracking-wider">
+                Ver Detalhes
+              </Link>
+            </motion.div>
+          )}
           <Outlet />
         </main>
       </div>

@@ -77,7 +77,8 @@ export default function ContractEditor() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure(),
+      Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -401,20 +402,20 @@ export default function ContractEditor() {
           {/* Toolbar */}
           <div className="border-b border-border p-2 flex items-center gap-1 bg-card">
             <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive('bold') ? 'bg-secondary font-bold' : ''}`}
+              onClick={() => editor?.chain().focus().toggleBold().run()}
+              className={`p-2 rounded hover:bg-accent ${editor?.isActive('bold') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="font-bold font-serif text-lg leading-none">B</span>
             </button>
             <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive('italic') ? 'bg-secondary font-bold' : ''}`}
+              onClick={() => editor?.chain().focus().toggleItalic().run()}
+              className={`p-2 rounded hover:bg-accent ${editor?.isActive('italic') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="italic font-serif text-lg leading-none">I</span>
             </button>
             <button
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive('underline') ? 'bg-secondary font-bold' : ''}`}
+              onClick={() => editor?.chain().focus().toggleUnderline().run()}
+              className={`p-2 rounded hover:bg-accent ${editor?.isActive('underline') ? 'bg-secondary font-bold' : ''}`}
             >
               <span className="underline font-serif text-lg leading-none">U</span>
             </button>
@@ -422,31 +423,16 @@ export default function ContractEditor() {
             <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
-              onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive({ textAlign: 'left' }) ? 'bg-secondary' : ''}`}
+              onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+              className={`p-2 rounded hover:bg-accent ${editor?.isActive({ textAlign: 'left' }) ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="15" x2="3" y1="12" y2="12"/><line x1="17" x2="3" y1="18" y2="18"/></svg>
             </button>
             <button
-              onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive({ textAlign: 'center' }) ? 'bg-secondary' : ''}`}
+              onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+              className={`p-2 rounded hover:bg-accent ${editor?.isActive({ textAlign: 'center' }) ? 'bg-secondary' : ''}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" x2="3" y1="6" y2="6"/><line x1="21" x2="3" y1="12" y2="12"/><line x1="21" x2="3" y1="18" y2="18"/></svg>
-            </button>
-            
-            <div className="w-px h-6 bg-secondary mx-2" />
-            
-            <button
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive('bulletList') ? 'bg-secondary' : ''}`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-2 rounded hover:bg-accent ${editor.isActive('orderedList') ? 'bg-secondary' : ''}`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" x2="21" y1="6" y2="6"/><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
             </button>
             
             <div className="w-px h-6 bg-secondary mx-2" />
@@ -462,7 +448,7 @@ export default function ContractEditor() {
             <div className="w-px h-6 bg-secondary mx-2" />
             
             <button
-              onClick={() => editor.chain().focus().insertContent('<span style="background-color: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: 500; font-family: monospace;">[Nova Variável]</span>').run()}
+              onClick={() => editor?.chain().focus().insertContent('<span style="background-color: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-weight: 500; font-family: monospace;">[Nova Variável]</span>').run()}
               className="flex items-center gap-1 px-3 py-1.5 rounded hover:bg-accent text-sm font-medium text-foreground"
             >
               <span className="font-mono text-xs bg-secondary px-1 rounded">&lt;/&gt;</span> Variável
@@ -474,7 +460,7 @@ export default function ContractEditor() {
             {editor && (
               <BubbleMenu 
                 editor={editor} 
-                tippyOptions={{ duration: 100 }} 
+                options={{ offset: [0, 8] }} 
                 shouldShow={({ editor }) => editor.isActive('image')}
               >
                 <div className="bg-white border border-border shadow-xl rounded-xl p-1 flex gap-1 animate-in fade-in zoom-in duration-200">

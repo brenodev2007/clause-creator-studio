@@ -89,6 +89,26 @@ const AdminPanel = () => {
     }
   };
 
+  const resetUserTokens = async (userId: number) => {
+    try {
+      // Mocking backend reset call
+      // In a real app, this would tell the backend to notify the user's client or clear their usage
+      
+      // Locally, if it's the current user, we can clear the localStorage directly
+      const storageKey = `contract-tokens-v2${userId}`;
+      localStorage.removeItem(storageKey);
+      
+      toast.success(`Saldo do usuário #${userId} resetado com sucesso.`);
+      
+      // If resetting own tokens, force reload of token data
+      if (userId === user?.id) {
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error('Erro ao resetar tokens.');
+    }
+  };
+
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -276,7 +296,16 @@ const AdminPanel = () => {
                         {new Date(u.created_at).toLocaleDateString('pt-BR')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
+                        title="Resetar Saldo (Refilar)"
+                        onClick={() => resetUserTokens(u.id)}
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </Button>
                       <Button 
                         variant={u.is_active ? "outline" : "default"} 
                         size="sm" 

@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 import ClausulasLibrary from "./pages/ClausulasLibrary";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import { TokenProvider } from "./context/TokenContext";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,34 +32,36 @@ const App = () => (
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Routes>
-              <Route path="/" element={<Login />} />
-              {/* App Routes with Layout */}
-              <Route path="/app" element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }>
-                {/* Default route for /app */}
-                <Route index element={<Dashboard />} />
-                <Route path="contratos" element={<ContratosList />} />
-                <Route path="modelos" element={<ModelosGallery />} />
-                <Route path="clausulas" element={<ClausulasLibrary />} />
-                <Route path="editor/:id" element={<ContractEditor />} />
-                <Route path="revisao/:id" element={<ContractReview />} />
-                <Route path="configuracoes" element={<Profile />} />
-                <Route path="admin" element={<AdminPanel />} />
-              </Route>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
+          <TokenProvider>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                {/* App Routes with Layout */}
+                <Route path="/app" element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }>
+                  {/* Default route for /app */}
+                  <Route index element={<Dashboard />} />
+                  <Route path="contratos" element={<ContratosList />} />
+                  <Route path="modelos" element={<ModelosGallery />} />
+                  <Route path="clausulas" element={<ClausulasLibrary />} />
+                  <Route path="editor/:id" element={<ContractEditor />} />
+                  <Route path="revisao/:id" element={<ContractReview />} />
+                  <Route path="configuracoes" element={<Profile />} />
+                  <Route path="admin" element={<AdminPanel />} />
+                </Route>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TokenProvider>
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>

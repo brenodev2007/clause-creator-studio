@@ -4,9 +4,11 @@ import { FileText, Folder, CheckCircle, Coins, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect } from "react";
+import { useTokens } from "@/hooks/use-tokens";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { tokens } = useTokens();
   
   const [contracts, setContracts] = useState<any[]>([]);
   const [templatesCount, setTemplatesCount] = useState(0);
@@ -38,7 +40,7 @@ export default function Dashboard() {
     { name: "Total de Contratos", value: contracts.length.toString(), icon: <Folder className="w-6 h-6 text-blue-500 dark:text-blue-400" />, bg: "bg-blue-100 dark:bg-blue-500/20" },
     { name: "Modelos Salvos", value: templatesCount.toString(), icon: <FileText className="w-6 h-6 text-purple-500 dark:text-purple-400" />, bg: "bg-purple-100 dark:bg-purple-500/20" },
     { name: "Concluídos", value: completedCount.toString(), icon: <CheckCircle className="w-6 h-6 text-green-500 dark:text-green-400" />, bg: "bg-green-100 dark:bg-green-500/20" },
-    { name: "Tokens Disponíveis", value: (user?.daily_tokens || 10).toString(), icon: <Coins className="w-6 h-6 text-amber-500 dark:text-amber-400" />, bg: "bg-amber-100 dark:bg-amber-500/20" },
+    { name: "Tokens Disponíveis", value: tokens.toString(), icon: <Coins className="w-6 h-6 text-amber-500 dark:text-amber-400" />, bg: "bg-amber-100 dark:bg-amber-500/20" },
   ];
 
   const formatDate = (dateStr: string) => {

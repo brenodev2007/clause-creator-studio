@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useTokens } from "../hooks/use-tokens";
 
 interface Signer {
   id: string;
@@ -37,6 +38,7 @@ export default function ContractReview() {
   const [signers, setSigners] = useState<Signer[]>([]);
   const [useOrder, setUseOrder] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { consumeTokens } = useTokens();
 
   useEffect(() => {
     const saved = localStorage.getItem('zelo_saved_contracts');
@@ -105,6 +107,10 @@ export default function ContractReview() {
       toast.error("Não foi possível gerar o PDF. Tente novamente.");
       return;
     }
+
+    // Consume tokens before generating PDF
+    const canExport = consumeTokens('export-pdf');
+    if (!canExport) return;
 
     setIsGeneratingPDF(true);
 
